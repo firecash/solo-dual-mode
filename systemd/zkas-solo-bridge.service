@@ -1,0 +1,21 @@
+[Unit]
+Description=ZKas local direct-payout Stratum bridge
+After=zkas-solo-node.service
+
+[Service]
+Type=simple
+WorkingDirectory=@ETC@
+Environment=RUST_LOG=info
+Environment=BRIDGE_ALLOW_UNSYNCED=0
+EnvironmentFile=-@ETC@/bridge.env
+ExecStart=@PREFIX@/stratum-bridge --node-mode external --config @ETC@/bridge.yaml
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=@DATA@ @ETC@
+
+[Install]
+WantedBy=multi-user.target

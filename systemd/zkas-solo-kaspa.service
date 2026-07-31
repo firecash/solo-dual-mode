@@ -1,0 +1,19 @@
+[Unit]
+Description=Kaspa parent node for ZKas AuxPoW merged mining
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-@ETC@/kaspa-node.env
+ExecStart=@PREFIX@/kaspad --appdir=${KASPA_DATA} --rpclisten=${KASPA_RPC} --listen=${KASPA_P2P} --utxoindex --disable-upnp --yes
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=@DATA@
+
+[Install]
+WantedBy=multi-user.target

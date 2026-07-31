@@ -1,0 +1,19 @@
+[Unit]
+Description=ZKas mainnet solo node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-@ETC@/zkas-node.env
+ExecStart=@PREFIX@/zkas-node --appdir=${ZKAS_DATA} --rpclisten=${ZKAS_RPC} --listen=${ZKAS_P2P} --utxoindex --disable-upnp --yes
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=@DATA@
+
+[Install]
+WantedBy=multi-user.target
