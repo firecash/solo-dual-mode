@@ -57,7 +57,9 @@ case "$choice" in
     if [[ -n $NODE_BIN && -n $BRIDGE_BIN ]]; then
       args+=(--zkas-node=managed "--zkas-node-bin=$NODE_BIN" "--bridge-bin=$BRIDGE_BIN")
     else
-      [[ -n ${ZKAS_RELEASE_MANIFEST_URL:-} && -n ${ZKAS_BRIDGE_MANIFEST_URL:-} ]] || die 'local binaries not found; set ZKAS_RELEASE_MANIFEST_URL and ZKAS_BRIDGE_MANIFEST_URL, then rerun'
+      if [[ -z ${ZKAS_RELEASE_MANIFEST_URL:-} || -z ${ZKAS_BRIDGE_MANIFEST_URL:-} ]]; then
+        die $'No local binaries or production release manifests were found. Build/copy them first:\n  ZKas node: cargo build --release -p kaspad (from firecash/zkas-rusty)\n  Bridge:    cargo build --release --bin stratum-bridge (from firecash/zkas-pool)\nThen rerun with ZKAS_NODE_BIN=/path/to/zkas-node and BRIDGE_BIN=/path/to/stratum-bridge, or configure the signed manifest URLs.'
+      fi
       args+=(--zkas-node=download "--zkas-release-manifest=$ZKAS_RELEASE_MANIFEST_URL" "--bridge-release-manifest=$ZKAS_BRIDGE_MANIFEST_URL")
     fi
     ;;
@@ -69,7 +71,9 @@ case "$choice" in
     if [[ -n $NODE_BIN && -n $BRIDGE_BIN && -n $KASPA_BIN ]]; then
       args+=(--zkas-node=managed "--zkas-node-bin=$NODE_BIN" --kaspa-node=managed "--kaspa-node-bin=$KASPA_BIN" "--kaspa-pay-address=$KASPA_PAY" "--bridge-bin=$BRIDGE_BIN")
     else
-      [[ -n ${ZKAS_RELEASE_MANIFEST_URL:-} && -n ${KASPA_RELEASE_MANIFEST_URL:-} && -n ${ZKAS_BRIDGE_MANIFEST_URL:-} ]] || die 'local binaries not found; set all three release manifest URLs, then rerun'
+      if [[ -z ${ZKAS_RELEASE_MANIFEST_URL:-} || -z ${KASPA_RELEASE_MANIFEST_URL:-} || -z ${ZKAS_BRIDGE_MANIFEST_URL:-} ]]; then
+        die $'No local binaries or production release manifests were found. Build/copy all three first:\n  ZKas node: cargo build --release -p kaspad (from firecash/zkas-rusty)\n  Kaspa node: cargo build --release -p kaspad (from kaspanet/rusty-kaspa)\n  Bridge:    cargo build --release --bin stratum-bridge (from firecash/zkas-pool)\nThen rerun with ZKAS_NODE_BIN, KASPA_NODE_BIN, and BRIDGE_BIN pointing to the binaries, or configure the three manifest URLs.'
+      fi
       args+=(--zkas-node=download "--kaspa-node=download" "--zkas-release-manifest=$ZKAS_RELEASE_MANIFEST_URL" "--kaspa-release-manifest=$KASPA_RELEASE_MANIFEST_URL" "--bridge-release-manifest=$ZKAS_BRIDGE_MANIFEST_URL" "--kaspa-pay-address=$KASPA_PAY")
     fi
     ;;

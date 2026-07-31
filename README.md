@@ -128,6 +128,31 @@ release should publish separate manifests for ZKas node, Kaspa node, and bridge
 with immutable versioned URLs, signed manifests, and signed checksums. “Latest” should mean a
 maintainer-updated manifest pointer, not an unpinned GitHub API asset lookup.
 
+No production manifests are published yet. Until they exist, build locally:
+
+```bash
+# ZKas node (the FireCash fork)
+git clone https://github.com/firecash/zkas-rusty.git
+cd zkas-rusty && cargo build --release -p kaspad
+
+# Kaspa parent node for merged mining (official Kaspa repository)
+git clone https://github.com/kaspanet/rusty-kaspa.git
+cd rusty-kaspa && git checkout v2.0.1 && cargo build --release -p kaspad
+
+# Bridge
+git clone https://github.com/firecash/zkas-pool.git
+cd zkas-pool && cargo build --release --bin stratum-bridge
+```
+
+Then export the binary paths before running `./setup.sh`:
+
+```bash
+export ZKAS_NODE_BIN=/path/to/zkas-rusty/target/release/kaspad
+export KASPA_NODE_BIN=/path/to/rusty-kaspa/target/release/kaspad
+export BRIDGE_BIN=/path/to/zkas-pool/target/release/stratum-bridge
+./setup.sh
+```
+
 Windows has the equivalent `install.ps1` and `run.ps1`. The PowerShell path
 uses the same explicit RPC/data-directory model and can run foreground without
 administrator privileges. A Windows service wrapper can be added later without
