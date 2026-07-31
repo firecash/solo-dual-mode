@@ -117,6 +117,21 @@ if [[ -n "$(find "$DATA" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" && !
   die "data directory is non-empty and not owned by this installer: $DATA"
 fi
 touch "$DATA/.zkas-solo-owned"
+cat > "$ETC/solo.conf" <<EOF
+# ZKas Solo Gateway generated configuration. Re-run setup.sh to change it.
+ZKAS_MODE=$ZKAS_MODE
+KASPA_MODE=$KASPA_MODE
+ZKAS_RPC=$ZKAS_RPC
+ZKAS_P2P=$ZKAS_P2P
+KASPA_RPC=$KASPA_RPC
+KASPA_P2P=$KASPA_P2P
+STRATUM_ENDPOINT=$STRATUM_ENDPOINT
+ZKAS_ADDRESS=$ZKAS_ADDRESS
+KASPA_PAY_ADDRESS=$KASPA_PAY
+INSTALL_DIR=$PREFIX
+CONFIG_DIR=$ETC
+DATA_DIR=$DATA
+EOF
 if [[ $ZKAS_MODE == managed ]]; then
   if [[ -n $NODE_BIN ]]; then install -m 0755 "$NODE_BIN" "$PREFIX/zkas-node"; else download_asset "$ZKAS_MANIFEST" zkas-node "$PREFIX/zkas-node"; chmod 0755 "$PREFIX/zkas-node"; fi
   install -d -m 0755 "$DATA/zkas-data"

@@ -41,6 +41,17 @@ the Kaspa parent is unavailable.
 
 ## Quick start from this checkout
 
+For the simplest installation, run the wizard with no flags:
+
+```bash
+sudo ./setup.sh
+```
+
+It detects local binaries, offers native-only / merged / external-node modes,
+uses safe default ports and paths, and asks only for addresses or RPC details
+that cannot be inferred safely. After confirmation it saves the configuration
+and starts only the selected managed services.
+
 There are two modes. **Managed** downloads a release selected by a maintainer
 manifest (HTTPS + SHA-256; signature verification is a release-hardening step)
 manifest and creates isolated services. **External** only configures the bridge
@@ -155,6 +166,11 @@ Installation files live below `/var/lib/zkas-solo` (data) and
 | `kaspa-node.env` | Optional parent-node settings |
 | `manifest.sha256` | Installed binary hashes |
 | `healthcheck.sh` | Read-only service/node/port check |
+
+`/etc/zkas-solo/solo.conf` is the saved human-readable setup snapshot. It is
+rewritten only when the installer is run and is never used as a wallet secret.
+Service restarts read the generated node/bridge files, so the selected RPCs and
+paths persist across reboots.
 
 The bridge is configured with `var_diff: true`, `shares_per_min: 20`, and an
 ASIC-safe floor of `8192`. This controls share reporting only; it does not
