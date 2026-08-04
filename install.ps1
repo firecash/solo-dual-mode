@@ -39,11 +39,9 @@ function Install-ManifestAsset([string]$ManifestUrl,[string]$AssetName,[string]$
 }
 if ($ZkasNode -eq 'existing' -and $ZkasNodeBin -and -not (Test-Path $ZkasNodeBin)) { throw "ZKas node binary not found: $ZkasNodeBin" }
 if ($KaspaNode -eq 'existing' -and [string]::IsNullOrWhiteSpace($KaspaPayAddress)) { throw 'Existing Kaspa mode requires a Kaspa payout address.' }
-if ($KaspaNode -eq 'existing' -and -not (Test-Path $KaspaNodeBin)) { throw "Kaspa node binary not found: $KaspaNodeBin" }
 New-Item -ItemType Directory -Force -Path $InstallDir,$DataDir,"$DataDir\zkas-data","$DataDir\kaspa-data","$DataDir\logs" | Out-Null
 if ($BridgeBin) { if (-not (Test-Path $BridgeBin)) { throw "Bridge binary not found: $BridgeBin" }; Copy-Item $BridgeBin "$InstallDir\stratum-bridge.exe" -Force }
 if ($ZkasNodeBin) { Copy-Item $ZkasNodeBin "$InstallDir\zkas-node.exe" -Force }
-if ($KaspaNode -eq 'existing') { Copy-Item $KaspaNodeBin "$InstallDir\kaspad.exe" -Force }
 if ($ZkasNode -eq 'download') { Install-ManifestAsset $ZkasReleaseManifest 'zkas-node.exe' "$InstallDir\zkas-node.exe" }
 if ($KaspaNode -eq 'download') { Install-ManifestAsset $KaspaReleaseManifest 'kaspad.exe' "$InstallDir\kaspad.exe" }
 if (-not $BridgeBin) { Install-ManifestAsset $BridgeReleaseManifest 'stratum-bridge.exe' "$InstallDir\stratum-bridge.exe" }

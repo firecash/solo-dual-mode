@@ -149,6 +149,7 @@ ZKAS_P2P=$ZKAS_P2P
 EOF
 cat > "$ETC/bridge.env" <<EOF
 # Empty means native-only. AuxPoW is enabled only when both values are set.
+ZKAS_MERGED_MINING=$([[ $KASPA_MODE == disabled ]] && echo 0 || echo 1)
 ZKAS_KASPA_NODE=$([[ $KASPA_MODE == disabled ]] && echo || echo "$KASPA_RPC")
 ZKAS_KASPA_PAY=$KASPA_PAY
 # The bridge version currently accepts malformed usernames and routes them to
