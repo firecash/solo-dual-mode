@@ -42,6 +42,8 @@ jobs:
           $bridgeManifest.Replace('prometheus = { workspace = true }', 'prometheus = "0.14.0"') | Set-Content rusty/bridge/Cargo.toml
           $domainManifest = Get-Content rusty/crates/katpool-domain/Cargo.toml -Raw
           $domainManifest = $domainManifest.Replace('publish.workspace = true', 'publish = false')
+          $domainManifest = $domainManifest.Replace('chrono = { workspace = true }', 'chrono = { version = "0.4", features = ["serde"] }')
+          $domainManifest = $domainManifest.Replace('uuid = { workspace = true }', 'uuid = { version = "1", features = ["v4", "v5", "serde"] }')
           $domainManifest.Replace('proptest = { workspace = true }', 'proptest = "1"') | Set-Content rusty/crates/katpool-domain/Cargo.toml
       - name: Validate overlaid Rusty workspace
         shell: bash
