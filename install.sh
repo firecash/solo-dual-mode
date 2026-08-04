@@ -112,10 +112,10 @@ for peer in $P2P_PEERS; do
   PEER_ARGS+=" --addpeer=$peer"
 done
 
-install -d -m 0755 "$PREFIX" "$ETC" "$DATA/logs"
 if [[ -n "$(find "$DATA" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" && ! -f "$DATA/.zkas-solo-owned" ]]; then
   die "data directory is non-empty and not owned by this installer: $DATA"
 fi
+install -d -m 0755 "$PREFIX" "$ETC" "$DATA/logs"
 touch "$DATA/.zkas-solo-owned"
 cat > "$ETC/solo.conf" <<EOF
 # ZKas Solo Gateway generated configuration. Re-run setup.sh to change it.
