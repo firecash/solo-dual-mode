@@ -1,0 +1,73 @@
+name: Release solo dual-mode bridge
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux-x64
+            binary: stratum-bridge
+          - os: windows-latest
+            artifact: windows-x64
+            binary: stratum-bridge.exe
+          - os: macos-15-intel
+            artifact: macos-x64
+            binary: stratum-bridge
+          - os: macos-latest
+            artifact: macos-arm64
+            binary: stratum-bridge
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.91.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bridge-src
+      - name: Build bridge
+        shell: bash
+        env:
+          RUSTFLAGS: ${{ runner.os == 'Windows' && '-C target-feature=+crt-static' || '' }}
+        run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
+      - name: Verify merged-mining capability
+        shell: bash
+        run: |
+          grep -a -q 'ZKAS_KASPA_NODE' bridge-src/target/release/${{ matrix.binary }}
+          grep -a -q 'Real merged mining ENABLED' bridge-src/target/release/${{ matrix.binary }}
+      - name: Stage artifact
+        shell: bash
+        run: |
+          mkdir dist
+          cp bridge-src/target/release/${{ matrix.binary }} dist/
+          cp bridge.yaml.template README.md install.sh install.ps1 run.ps1 dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: solo-dual-mode-${{ matrix.artifact }}
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Package and checksum
+        run: |
+          for dir in artifacts/*; do tar -C "$dir" -czf "$(basename "$dir").tar.gz" .; done
+          sha256sum *.tar.gz > SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.tar.gz
+            SHA256SUMS
