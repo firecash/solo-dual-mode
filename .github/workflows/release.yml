@@ -37,6 +37,7 @@ jobs:
         shell: bash
         run: |
           source musl-toolchain/build.sh
+          cd "$GITHUB_WORKSPACE"
           export RUSTFLAGS="$RUSTFLAGS -C link-arg=-Wl,--allow-multiple-definition"
           cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge --target x86_64-unknown-linux-musl
           mkdir -p bridge-src/target/release
