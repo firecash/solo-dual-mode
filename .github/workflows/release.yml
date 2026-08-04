@@ -19,12 +19,6 @@ jobs:
           - os: windows-latest
             artifact: windows-x64
             binary: stratum-bridge.exe
-          - os: macos-15-intel
-            artifact: macos-x64
-            binary: stratum-bridge
-          - os: macos-latest
-            artifact: macos-arm64
-            binary: stratum-bridge
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -51,10 +45,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
-      - name: Build bridge on macOS
-        if: runner.os == 'macOS'
-        shell: bash
-        run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
       - name: Verify merged-mining capability
         shell: bash
         run: |
@@ -66,8 +56,8 @@ jobs:
           mkdir dist
           cp bridge-src/target/release/${{ matrix.binary }} dist/
           cp bridge.yaml.template README.md install.sh install.ps1 run.ps1 dist/
-      - name: Package Linux/macOS ZIP
-        if: runner.os != 'Windows'
+      - name: Package Linux ZIP
+        if: runner.os == 'Linux'
         shell: bash
         run: cd dist && zip -r ../solo-dual-mode-${{ matrix.artifact }}.zip .
       - name: Package Windows ZIP
