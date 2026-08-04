@@ -1,0 +1,56 @@
+[workspace]
+resolver = "2"
+members = ["bridge", "crates/katpool-domain"]
+exclude = ["bridge/fuzz"]
+
+[workspace.package]
+version = "1.0.6"
+edition = "2024"
+rust-version = "1.91.0"
+license = "MIT OR Apache-2.0"
+authors = ["ZKas contributors"]
+repository = "https://github.com/firecash/solo-dual-mode"
+publish = false
+
+[workspace.dependencies]
+kaspa-alloc          = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-consensus-core = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-hashes         = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-math           = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-merkle         = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-pow            = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-addresses      = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-rpc-core       = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-rpc-service    = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-grpc-client    = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-notify         = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-core           = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspa-utils          = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+kaspad               = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+dirs = "5"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+hex = "0.4"
+num-traits = "0.2"
+async-trait = "0.1"
+once_cell = "1"
+futures-util = "0.3"
+parking_lot = "0.12"
+regex = "1"
+uuid = { version = "1", features = ["v4", "v5", "serde"] }
+clap = { version = "4", features = ["derive"] }
+prometheus = "0.14"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.9"
+proptest = "1"
+
+[workspace.lints.rust]
+warnings = "allow"
+
+[workspace.lints.clippy]
+all = "allow"
+
+[workspace.lints.rustdoc]
+all = "allow"
