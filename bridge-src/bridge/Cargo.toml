@@ -38,11 +38,13 @@ kaspa-math = { workspace = true }
 kaspa-pow = { workspace = true }
 kaspa-addresses = { workspace = true }
 kaspa-rpc-core = { workspace = true }
+kaspa-rpc-service = { workspace = true }
 kaspa-grpc-client = { workspace = true }
 kaspa-notify = { workspace = true }
 kaspa-core = { workspace = true }
 kaspa-utils = { workspace = true }
 kaspa-alloc = { workspace = true }
+kaspad = { workspace = true }
 dirs = { workspace = true }
 
 # External dependencies - using workspace versions where available

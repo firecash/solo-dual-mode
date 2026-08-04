@@ -13,20 +13,20 @@ repository = "https://github.com/firecash/solo-dual-mode"
 publish = false
 
 [workspace.dependencies]
-kaspa-alloc          = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-consensus-core = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-hashes         = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-math           = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-merkle         = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-pow            = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-addresses      = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-rpc-core       = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-rpc-service    = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-grpc-client    = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-notify         = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-core           = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspa-utils          = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
-kaspad               = { git = "https://github.com/firecash/zkas-rusty", rev = "424b7036467422b38dccc9c85a4fb45b39b9993d" }
+kaspa-alloc          = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-consensus-core = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-hashes         = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-math           = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-merkle         = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-pow            = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-addresses      = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-rpc-core       = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-rpc-service    = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-grpc-client    = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-notify         = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-core           = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspa-utils          = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
+kaspad               = { git = "https://github.com/firecash/zkas-rusty", rev = "e3589f7e3bedf21b4894ceb562a61468108529a5" }
 dirs = "5"
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
