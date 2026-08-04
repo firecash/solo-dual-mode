@@ -34,31 +34,50 @@ jobs:
       - name: Install Protocol Buffers compiler
         uses: arduino/setup-protoc@v3
         with:
-          version: "29.x"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: bridge-src
-      - name: Build bridge
+      - name: Build bridge on Linux (portable MUSL)
+        if: runner.os == 'Linux'
         shell: bash
-        env:
-          RUSTFLAGS: ${{ runner.os == 'Windows' && '-C target-feature=+crt-static' || '' }}
+        run: |
+          source musl-toolchain/build.sh
+          export RUSTFLAGS="$RUSTFLAGS -C link-arg=-Wl,--allow-multiple-definition"
+          cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge --target x86_64-unknown-linux-musl
+          mkdir -p bridge-src/target/release
+          cp bridge-src/target/x86_64-unknown-linux-musl/release/stratum-bridge bridge-src/target/release/
+      - name: Build bridge on Windows (static MSVC CRT)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
+      - name: Build bridge on macOS
+        if: runner.os == 'macOS'
+        shell: bash
         run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
       - name: Verify merged-mining capability
         shell: bash
         run: |
           grep -a -q 'ZKAS_KASPA_NODE' bridge-src/target/release/${{ matrix.binary }}
           grep -a -q 'Real merged mining ENABLED' bridge-src/target/release/${{ matrix.binary }}
-      - name: Stage artifact
+      - name: Stage files
         shell: bash
         run: |
           mkdir dist
           cp bridge-src/target/release/${{ matrix.binary }} dist/
           cp bridge.yaml.template README.md install.sh install.ps1 run.ps1 dist/
+      - name: Package Linux/macOS ZIP
+        if: runner.os != 'Windows'
+        shell: bash
+        run: cd dist && zip -r ../solo-dual-mode-${{ matrix.artifact }}.zip .
+      - name: Package Windows ZIP
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/* -DestinationPath solo-dual-mode-${{ matrix.artifact }}.zip
       - uses: actions/upload-artifact@v4
         with:
           name: solo-dual-mode-${{ matrix.artifact }}
-          path: dist/
+          path: solo-dual-mode-${{ matrix.artifact }}.zip
 
   publish:
     needs: build
@@ -69,10 +88,10 @@ jobs:
           path: artifacts
       - name: Package and checksum
         run: |
-          for dir in artifacts/*; do tar -C "$dir" -czf "$(basename "$dir").tar.gz" .; done
-          sha256sum *.tar.gz > SHA256SUMS
+          find artifacts -name '*.zip' -exec cp {} . \;
+          sha256sum *.zip > SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            *.tar.gz
+            *.zip
             SHA256SUMS
