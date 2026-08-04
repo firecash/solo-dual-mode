@@ -88,4 +88,4 @@ export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=$CC
 rustup target add x86_64-unknown-linux-musl
 
 # Install missing dependencies
-cargo fetch --target x86_64-unknown-linux-musl
+cargo fetch --manifest-path "$GITHUB_WORKSPACE/bridge-src/Cargo.toml" --target x86_64-unknown-linux-musl
