@@ -54,3 +54,36 @@ all = "allow"
 
 [workspace.lints.rustdoc]
 all = "allow"
+
+[profile.release]
+lto = "thin"
+strip = true
+overflow-checks = true
+
+[profile.release.package.halo2_proofs]
+opt-level = 3
+codegen-units = 1
+overflow-checks = false
+
+[profile.release.package.halo2_gadgets]
+opt-level = 3
+codegen-units = 1
+overflow-checks = false
+
+[profile.release.package.pasta_curves]
+opt-level = 3
+codegen-units = 1
+overflow-checks = false
+
+[profile.release.package.orchard]
+opt-level = 3
+codegen-units = 1
+overflow-checks = false
+
+[profile.release.package.ff]
+opt-level = 3
+overflow-checks = false
+
+[profile.release.package.group]
+opt-level = 3
+overflow-checks = false
