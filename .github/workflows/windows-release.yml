@@ -14,6 +14,12 @@ jobs:
         run: git config --global core.autocrlf false
       - name: Checkout sources
         uses: actions/checkout@v4
+      - name: Checkout proven Rusty workspace
+        uses: actions/checkout@v4
+        with:
+          repository: firecash/zkas-rusty
+          ref: e3589f7e3bedf21b4894ceb562a61468108529a5
+          path: rusty
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
         with:
@@ -23,14 +29,33 @@ jobs:
       - name: Cache Cargo build outputs
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: bridge-src
+          workspaces: rusty
+      - name: Overlay solo bridge onto Rusty workspace
+        shell: pwsh
+        run: |
+          Copy-Item -Recurse -Force bridge-src/bridge/* rusty/bridge/
+          New-Item -ItemType Directory -Force rusty/crates/katpool-domain | Out-Null
+          Copy-Item -Recurse -Force bridge-src/crates/katpool-domain/* rusty/crates/katpool-domain/
+          # Adapt the two workspace-inherited fields absent from the pinned
+          # Rusty root manifest. Source code and dependency versions stay unchanged.
+          $bridgeManifest = Get-Content rusty/bridge/Cargo.toml -Raw
+          $bridgeManifest.Replace('prometheus = { workspace = true }', 'prometheus = "0.14.0"') | Set-Content rusty/bridge/Cargo.toml
+          $domainManifest = Get-Content rusty/crates/katpool-domain/Cargo.toml -Raw
+          $domainManifest = $domainManifest.Replace('publish.workspace = true', 'publish = false')
+          $domainManifest.Replace('proptest = { workspace = true }', 'proptest = "1"') | Set-Content rusty/crates/katpool-domain/Cargo.toml
+      - name: Validate overlaid Rusty workspace
+        shell: bash
+        run: cargo metadata --manifest-path rusty/Cargo.toml --no-deps --format-version 1 > /dev/null
       - name: Build Windows bridge
         shell: bash
-        run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
+        run: |
+          # Preserve the exact successful v1.0.5 native-Windows build order.
+          cargo build --release --manifest-path rusty/Cargo.toml --bin kaspad
+          cargo build --release --manifest-path rusty/Cargo.toml --bin stratum-bridge
       - name: Verify merged-mining capability and static runtime
         shell: pwsh
         run: |
-          $exe = "bridge-src/target/release/stratum-bridge.exe"
+          $exe = "rusty/target/release/stratum-bridge.exe"
           $text = [Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes($exe))
           foreach ($marker in @("ZKAS_KASPA_NODE", "merged_kaspa_address", "Real merged mining ENABLED")) {
             if (-not $text.Contains($marker)) { throw "Missing merged-mining marker: $marker" }
@@ -42,7 +67,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item bridge-src/target/release/stratum-bridge.exe, bridge.yaml.template, README.md, install.ps1, run.ps1 dist/
+          Copy-Item rusty/target/release/stratum-bridge.exe, bridge.yaml.template, README.md, install.ps1, run.ps1 dist/
           Compress-Archive -Path dist/* -DestinationPath solo-dual-mode-windows-x64.zip
       - name: Upload Windows release asset
         uses: softprops/action-gh-release@v2
