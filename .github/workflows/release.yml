@@ -3,26 +3,60 @@ name: Release solo dual-mode bridge
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build
+        required: true
 
 permissions:
   contents: write
 
 jobs:
   build:
+    name: ${{ matrix.artifact }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             artifact: linux-x64
+            target: x86_64-unknown-linux-musl
             binary: stratum-bridge
-          - os: windows-latest
+            portable_musl: true
+          - os: ubuntu-22.04-arm
+            artifact: linux-arm64
+            target: aarch64-unknown-linux-gnu
+            binary: stratum-bridge
+            portable_musl: false
+          - os: macos-15-intel
+            artifact: macos-x64
+            target: x86_64-apple-darwin
+            binary: stratum-bridge
+            portable_musl: false
+          - os: macos-15
+            artifact: macos-arm64
+            target: aarch64-apple-darwin
+            binary: stratum-bridge
+            portable_musl: false
+          - os: windows-2025
             artifact: windows-x64
+            target: x86_64-pc-windows-msvc
             binary: stratum-bridge.exe
+            portable_musl: false
+          - os: windows-11-arm
+            artifact: windows-arm64
+            target: aarch64-pc-windows-msvc
+            binary: stratum-bridge.exe
+            portable_musl: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
       - name: Install Protocol Buffers compiler
         uses: arduino/setup-protoc@v3
         with:
@@ -30,57 +64,71 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: bridge-src
-      - name: Build bridge on Linux (portable MUSL)
-        if: runner.os == 'Linux'
+          key: ${{ matrix.target }}
+      - name: Build portable Linux x64 bridge
+        if: matrix.portable_musl
         shell: bash
         run: |
           source musl-toolchain/build.sh
-          cd "$GITHUB_WORKSPACE"
           export RUSTFLAGS="$RUSTFLAGS -C link-arg=-Wl,--allow-multiple-definition"
-          cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge --target x86_64-unknown-linux-musl
-          mkdir -p bridge-src/target/release
-          cp bridge-src/target/x86_64-unknown-linux-musl/release/stratum-bridge bridge-src/target/release/
-      - name: Build bridge on Windows (static MSVC CRT)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
-      - name: Verify merged-mining capability
+          cargo build --locked --release \
+            --manifest-path bridge-src/Cargo.toml \
+            --bin stratum-bridge \
+            --target '${{ matrix.target }}'
+      - name: Build native bridge
+        if: ${{ !matrix.portable_musl }}
         shell: bash
         run: |
-          grep -a -q 'ZKAS_KASPA_NODE' bridge-src/target/release/${{ matrix.binary }}
-          grep -a -q 'Real merged mining ENABLED' bridge-src/target/release/${{ matrix.binary }}
-      - name: Stage files
+          cargo build --locked --release \
+            --manifest-path bridge-src/Cargo.toml \
+            --bin stratum-bridge \
+            --target '${{ matrix.target }}'
+      - name: Verify executable and merged-mining dashboard
         shell: bash
         run: |
-          mkdir dist
-          cp bridge-src/target/release/${{ matrix.binary }} dist/
+          bin='bridge-src/target/${{ matrix.target }}/release/${{ matrix.binary }}'
+          test -f "$bin"
+          "$bin" --version
+          grep -a -q 'ZKAS_KASPA_NODE' "$bin"
+          grep -a -q 'Real merged mining ENABLED' "$bin"
+          grep -a -q 'KAS BLOCK ACCEPTED' "$bin"
+          grep -a -q 'totalKasBlocks' "$bin"
+      - name: Stage package
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp 'bridge-src/target/${{ matrix.target }}/release/${{ matrix.binary }}' dist/
           cp bridge.yaml.template README.md install.sh install.ps1 run.ps1 dist/
-      - name: Package Linux ZIP
-        if: runner.os == 'Linux'
+      - name: Package Unix ZIP
+        if: runner.os != 'Windows'
         shell: bash
-        run: cd dist && zip -r ../solo-dual-mode-${{ matrix.artifact }}.zip .
+        run: cd dist && zip -r '../solo-dual-mode-${{ matrix.artifact }}.zip' .
       - name: Package Windows ZIP
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist/* -DestinationPath solo-dual-mode-${{ matrix.artifact }}.zip
+        run: Compress-Archive -Path dist/* -DestinationPath 'solo-dual-mode-${{ matrix.artifact }}.zip'
       - uses: actions/upload-artifact@v4
         with:
           name: solo-dual-mode-${{ matrix.artifact }}
           path: solo-dual-mode-${{ matrix.artifact }}.zip
+          if-no-files-found: error
 
   publish:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Package and checksum
+      - name: Collect packages and checksums
         run: |
           find artifacts -name '*.zip' -exec cp {} . \;
-          sha256sum *.zip > SHA256SUMS
+          test "$(find . -maxdepth 1 -name 'solo-dual-mode-*.zip' | wc -l)" -eq 6
+          sha256sum solo-dual-mode-*.zip > SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          generate_release_notes: true
           files: |
-            *.zip
+            solo-dual-mode-*.zip
             SHA256SUMS

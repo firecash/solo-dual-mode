@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ZKas Pool</title>
+  <title>ZKas Dual Mining</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold kaspa-primary flex items-center gap-3">
           <img src="static/assets/zkas.png" alt="ZKas" class="rk-logo h-9 w-auto" />
-          <span>ZKas Pool</span>
+          <span>ZKas Dual Mining</span>
         </h1>
         <div class="flex items-center gap-2 sm:gap-4">
           <div class="flex items-center space-x-2 sm:space-x-3">
@@ -42,10 +42,14 @@
         </div>
       </div>
 
-      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-8 gap-3">
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-9 gap-3">
       <div class="bg-surface-2 rounded-lg px-4 py-2 border border-card min-w-0">
-        <div class="text-gray-400 text-xs">Total Blocks</div>
+        <div class="text-gray-400 text-xs">ZKAS Blocks</div>
         <div id="totalBlocks" class="text-base font-semibold tabular-nums leading-tight truncate">-</div>
+      </div>
+      <div class="bg-surface-2 rounded-lg px-4 py-2 border border-card min-w-0">
+        <div class="text-gray-400 text-xs">KAS Blocks</div>
+        <div id="totalKasBlocks" class="text-base font-semibold tabular-nums leading-tight truncate">-</div>
       </div>
       <div class="bg-surface-2 rounded-lg px-4 py-2 border border-card min-w-0">
         <div class="text-gray-400 text-xs">Total Shares</div>
@@ -121,7 +125,7 @@
         </div>
 
         <div class="pt-2">
-          <label class="text-gray-400">Wallet Search</label>
+          <label class="text-gray-400">ZKAS wallet search</label>
           <div class="mt-1 flex items-center gap-2">
             <input id="walletSearchInput" type="text" placeholder="zkas:..." autocomplete="off"
               class="w-full px-4 py-2 bg-surface-2 border border-card rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-kaspa-primary" />
@@ -130,6 +134,18 @@
           </div>
           <input id="walletFilter" type="hidden" />
           <div id="walletSummary" class="mt-3 hidden bg-surface-2 border border-card rounded-lg px-4 py-3"></div>
+        </div>
+
+        <div class="pt-4">
+          <label class="text-gray-400">KAS wallet search</label>
+          <div class="mt-1 flex items-center gap-2">
+            <input id="kasWalletSearchInput" type="text" placeholder="kaspa:..." autocomplete="off"
+              class="w-full px-4 py-2 bg-surface-2 border border-card rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-kaspa-primary" />
+            <button id="kasWalletSearchBtn" type="button" class="bg-kaspa-primary hover-bg-kaspa-primary px-4 py-2 rounded-lg text-sm font-medium text-white">Search</button>
+            <button id="kasWalletClearBtn" type="button" class="bg-surface-2 border border-card px-4 py-2 rounded-lg text-sm font-medium text-white hover:border-kaspa-primary">Clear</button>
+          </div>
+          <input id="kasWalletFilter" type="hidden" />
+          <div id="kasWalletSummary" class="mt-3 hidden bg-surface-2 border border-card rounded-lg px-4 py-3"></div>
         </div>
 
         <div class="text-sm text-gray-300 space-y-2" data-collapsible-body="metrics">
@@ -141,7 +157,7 @@
 
       <div class="bg-surface-2 rounded-lg p-6 border border-card xl:col-span-6">
         <div class="flex items-center justify-between gap-4 mb-4">
-          <h3 class="text-lg font-semibold kaspa-primary">Blocks Mined</h3>
+          <h3 class="text-lg font-semibold kaspa-primary">ZKAS Blocks by Worker</h3>
           <div class="flex items-center gap-3">
             <div class="text-xs text-gray-400">Distribution by worker (filtered by wallet if set)</div>
             <button type="button" class="bg-surface-1 border border-card px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:border-kaspa-primary flex items-center gap-2" data-collapsible-toggle="blocksMined" aria-expanded="true">
@@ -165,7 +181,7 @@
 
     <div class="bg-surface-2 rounded-lg p-4 sm:p-6 border border-card mb-8 xl:col-span-12">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-          <h3 class="text-lg font-semibold kaspa-primary">Recent Blocks</h3>
+          <h3 class="text-lg font-semibold kaspa-primary">Recent ZKAS Blocks</h3>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <div class="flex items-center gap-2">
               <label for="blocksDayFilter" class="text-xs text-gray-400 whitespace-nowrap">Filter by days:</label>
@@ -217,6 +233,40 @@
         </div>
       </div>
 
+    <div class="bg-surface-2 rounded-lg p-4 sm:p-6 border border-card mb-8 xl:col-span-12">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-lg font-semibold kaspa-primary">Recent KAS Blocks</h3>
+          <p class="text-xs text-gray-400 mt-1">Accepted by the configured Kaspa node. Reward appears only when the parent RPC can verify the later DAG payout.</p>
+        </div>
+        <button id="downloadKasBlocksCsv" type="button" class="bg-surface-1 border border-card px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-white hover:border-kaspa-primary">Download CSV</button>
+      </div>
+      <div class="sm:hidden text-xs text-gray-400 mb-2">Swipe sideways for all fields, or tap a row for details.</div>
+      <div class="table-wrap">
+        <table class="min-w-[1120px] w-max text-sm">
+          <colgroup>
+            <col style="width: 12rem;" />
+            <col style="width: 8rem;" />
+            <col style="width: 16rem;" />
+            <col style="width: 16rem;" />
+            <col style="width: 8rem;" />
+            <col style="width: 14rem;" />
+          </colgroup>
+          <thead class="text-gray-400">
+            <tr class="border-b border-card">
+              <th class="text-left py-2 pr-3">Timestamp</th>
+              <th class="text-left py-2 pr-3">Worker</th>
+              <th class="text-left py-2 pr-3">ZKAS wallet</th>
+              <th class="text-left py-2 pr-3">KAS payout wallet</th>
+              <th class="text-left py-2 pr-3">Reward</th>
+              <th class="text-left py-2 pr-3">Block hash</th>
+            </tr>
+          </thead>
+          <tbody id="kasBlocksBody" class="text-gray-200"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="bg-surface-2 rounded-lg p-6 border border-card mb-8 xl:col-span-12">
         <div class="flex items-center justify-between gap-4 mb-4">
           <h3 class="text-lg font-semibold kaspa-primary">Workers</h3>
@@ -242,6 +292,7 @@
                 <col style="width: 4.5rem;" />
                 <col style="width: 4.5rem;" />
                 <col style="width: 4.5rem;" />
+                <col style="width: 4.5rem;" />
                 <col style="width: 5rem;" />
                 <col style="width: 8rem;" />
                 <col style="width: 8rem;" />
@@ -256,7 +307,8 @@
                   <th class="text-left py-2 pr-3">Shares</th>
                   <th class="text-left py-2 pr-3">Stale</th>
                   <th class="text-left py-2 pr-3">Invalid</th>
-                  <th class="text-left py-2 pr-3">Blocks</th>
+                  <th class="text-left py-2 pr-3">ZKAS Blocks</th>
+                  <th class="text-left py-2 pr-3">KAS Blocks</th>
                   <th class="text-left py-2 pr-3">Status</th>
                   <th class="text-left py-2 pr-3">Last Seen</th>
                   <th class="text-left py-2 pr-3">Session Uptime</th>

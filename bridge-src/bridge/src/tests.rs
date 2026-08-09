@@ -1073,7 +1073,7 @@ fn test_parse_instance_spec_multiple_ports() {
 // These tests run with: cargo test -p kaspa-stratum-bridge --bin stratum-bridge
 // Or with CPU miner: cargo test -p kaspa-stratum-bridge --features rkstratum_cpu_miner --bin stratum-bridge
 
-#[cfg(test)]
+#[cfg(all(test, feature = "inprocess_node"))]
 mod integration {
     use kaspa_alloc::init_allocator_with_default_settings;
     use kaspa_stratum_bridge::{KaspaApi, StratumServerBridgeConfig as StratumBridgeConfig, listen_and_serve_with_shutdown};

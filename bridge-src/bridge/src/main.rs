@@ -3,6 +3,7 @@ use futures_util::future::try_join_all;
 use kaspa_alloc::init_allocator_with_default_settings;
 use kaspa_stratum_bridge::log_colors::LogColors;
 use kaspa_stratum_bridge::{KaspaApi, StratumServerBridgeConfig as StratumBridgeConfig, listen_and_serve_with_shutdown, prom};
+#[cfg(feature = "inprocess_node")]
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 #[cfg(windows)]
@@ -16,11 +17,13 @@ use tracing_subscriber::EnvFilter;
 #[cfg(windows)]
 use windows_sys::Win32::System::Console::{CTRL_C_EVENT, SetConsoleCtrlHandler};
 
+#[cfg(feature = "inprocess_node")]
 use kaspad_lib::args as kaspad_args;
 
 mod app_dirs;
 mod cli;
 mod health_check;
+#[cfg(feature = "inprocess_node")]
 mod inprocess_node;
 mod tracing_setup;
 
@@ -28,6 +31,7 @@ mod tracing_setup;
 mod tests;
 
 use cli::{Cli, NodeMode, apply_cli_overrides};
+#[cfg(feature = "inprocess_node")]
 use inprocess_node::InProcessNode;
 use kaspa_stratum_bridge::BridgeConfig;
 
@@ -86,6 +90,7 @@ fn install_windows_ctrl_handler(shutdown_tx: watch::Sender<bool>) -> Result<(), 
     Ok(())
 }
 
+#[cfg(feature = "inprocess_node")]
 async fn shutdown_inprocess_with_timeout(node: InProcessNode) {
     let timeout = std::time::Duration::from_secs(10);
     match tokio::time::timeout(timeout, inprocess_node::shutdown_inprocess(node)).await {
@@ -195,7 +200,16 @@ async fn main() -> Result<(), anyhow::Error> {
         tracing::warn!("Failed to set requested config path - may already be initialized");
     }
 
-    let node_mode = cli.node_mode.unwrap_or(NodeMode::Inprocess);
+    // The installer manages the ZKas node as a separate process, so release
+    // builds default to the bridge's external-node mode.
+    let node_mode = cli.node_mode.unwrap_or(NodeMode::External);
+
+    #[cfg(not(feature = "inprocess_node"))]
+    if node_mode == NodeMode::Inprocess {
+        return Err(anyhow::anyhow!(
+            "this bridge was built without the optional embedded-node feature; run a ZKas node separately and use --node-mode external"
+        ));
+    }
 
     let mut config = initialize_config();
     apply_cli_overrides(&mut config, &cli)?;
@@ -236,7 +250,9 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // Start in-process node after tracing is initialized so bridge logs (including the stats table)
     // are not filtered out by a tracing subscriber installed by kaspad.
+    #[cfg(feature = "inprocess_node")]
     let mut inprocess_node: Option<InProcessNode> = None;
+    #[cfg(feature = "inprocess_node")]
     if node_mode == NodeMode::Inprocess {
         let mut node_args: Vec<String> = cli.kaspad_args;
 
@@ -322,7 +338,6 @@ async fn main() -> Result<(), anyhow::Error> {
     tracing::info!("Node is synced, starting stratum listeners");
 
     // Optional: internal CPU miner (feature-gated)
-    #[cfg(feature = "rkstratum_cpu_miner")]
     #[cfg(feature = "rkstratum_cpu_miner")]
     {
         if cli.internal_cpu_miner {
@@ -503,6 +518,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     tokio::select! {
         res = &mut bridge_fut => {
+            #[cfg(feature = "inprocess_node")]
             if let Some(node) = inprocess_node {
                 shutdown_inprocess_with_timeout(node).await;
             }
@@ -526,8 +542,11 @@ async fn main() -> Result<(), anyhow::Error> {
                     }
                 };
 
-                if let Some(node) = inprocess_node {
-                    shutdown_inprocess_with_timeout(node).await;
+                #[cfg(feature = "inprocess_node")]
+                {
+                    if let Some(node) = inprocess_node {
+                        shutdown_inprocess_with_timeout(node).await;
+                    }
                 }
 
                 if let Err(e) = res {
@@ -546,8 +565,11 @@ async fn main() -> Result<(), anyhow::Error> {
                     }
                 };
 
-                if let Some(node) = inprocess_node {
-                    shutdown_inprocess_with_timeout(node).await;
+                #[cfg(feature = "inprocess_node")]
+                {
+                    if let Some(node) = inprocess_node {
+                        shutdown_inprocess_with_timeout(node).await;
+                    }
                 }
 
                 if let Err(e) = res {

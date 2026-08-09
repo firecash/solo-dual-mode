@@ -1,5 +1,6 @@
 let lastFilteredWorkers = [];
 let lastFilteredBlocks = [];
+let lastFilteredKasBlocks = [];
 let lastInternalCpuWorker = null;
 
 const CACHE_KEYS = {
@@ -9,6 +10,7 @@ const CACHE_KEYS = {
 };
 
 const WALLET_FILTER_KEY = 'ks_bridge_wallet_filter_v1';
+const KAS_WALLET_FILTER_KEY = 'ks_bridge_kas_wallet_filter_v1';
 const WORKER_ORDER_KEY = 'ks_bridge_worker_order_v1';
 const BLOCKS_DAY_FILTER_KEY = 'ks_bridge_blocks_day_filter_v1';
 
@@ -486,9 +488,17 @@ function mergeBlockHistory(incomingBlocks, existingBlocks) {
   return merged;
 }
 
+function mergeKasBlockHistory(incomingBlocks, existingBlocks) {
+  const byHash = new Map();
+  for (const b of (existingBlocks || [])) if (b?.hash) byHash.set(b.hash, b);
+  for (const b of (incomingBlocks || [])) if (b?.hash) byHash.set(b.hash, b);
+  return Array.from(byHash.values()).sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
+}
+
 function cacheUpdate(status, stats) {
   const existing = cacheReadJson(CACHE_KEYS.stats);
   const mergedBlocks = mergeBlockHistory(stats?.blocks, existing?.blocks);
+  const mergedKasBlocks = mergeKasBlockHistory(stats?.kasBlocks, existing?.kasBlocks);
   const prevTotalBlocks = Number(existing?.totalBlocks);
   const incomingTotalBlocks = stats?.totalBlocks ?? stats?.total_blocks ?? stats?.totalblocks;
   const nextTotalBlocks = Number(incomingTotalBlocks);
@@ -503,8 +513,21 @@ function cacheUpdate(status, stats) {
 
   // Render with full block history, but keep localStorage bounded to avoid quota issues.
   const CACHE_BLOCKS_MAX = 500;
-  const statsToRender = { ...(stats || {}), totalBlocks, blocks: mergedBlocks };
-  const statsToStore = { ...(stats || {}), totalBlocks, blocks: mergedBlocks.slice(0, CACHE_BLOCKS_MAX) };
+  const incomingKasTotal = Number(stats?.totalKasBlocks);
+  const previousKasTotal = Number(existing?.totalKasBlocks);
+  const totalKasBlocks = Math.max(
+    Number.isFinite(incomingKasTotal) ? incomingKasTotal : 0,
+    Number.isFinite(previousKasTotal) ? previousKasTotal : 0,
+    mergedKasBlocks.length,
+  );
+  const statsToRender = { ...(stats || {}), totalBlocks, blocks: mergedBlocks, totalKasBlocks, kasBlocks: mergedKasBlocks };
+  const statsToStore = {
+    ...(stats || {}),
+    totalBlocks,
+    blocks: mergedBlocks.slice(0, CACHE_BLOCKS_MAX),
+    totalKasBlocks,
+    kasBlocks: mergedKasBlocks.slice(0, CACHE_BLOCKS_MAX),
+  };
   cacheWriteJson(CACHE_KEYS.status, status);
   cacheWriteJson(CACHE_KEYS.stats, statsToStore);
   try { localStorage.setItem(CACHE_KEYS.updatedMs, String(Date.now())); } catch {}
@@ -635,6 +658,78 @@ function getWalletFilterFromStorage() {
     return normalizeWalletFilter(localStorage.getItem(WALLET_FILTER_KEY));
   } catch {
     return '';
+  }
+}
+
+function getKasWalletFilter() {
+  return normalizeWalletFilter(document.getElementById('kasWalletFilter')?.value);
+}
+
+function setKasWalletFilter(value) {
+  const v = normalizeWalletFilter(value);
+  const el = document.getElementById('kasWalletFilter');
+  if (el) el.value = v;
+  try {
+    if (v) localStorage.setItem(KAS_WALLET_FILTER_KEY, v);
+    else localStorage.removeItem(KAS_WALLET_FILTER_KEY);
+  } catch {}
+}
+
+function getKasWalletFilterFromStorage() {
+  try { return normalizeWalletFilter(localStorage.getItem(KAS_WALLET_FILTER_KEY)); }
+  catch { return ''; }
+}
+
+function formatKasReward(sompi) {
+  if (sompi == null || sompi === '') return 'Pending / unavailable';
+  const value = Number(sompi);
+  if (!Number.isFinite(value) || value < 0) return 'Pending / unavailable';
+  return `${(value / 100_000_000).toLocaleString(undefined, { maximumFractionDigits: 8 })} KAS`;
+}
+
+function renderKasWalletSummary(stats, filter) {
+  const el = document.getElementById('kasWalletSummary');
+  if (!el) return;
+  const f = normalizeWalletFilter(filter);
+  if (!f) {
+    el.classList.add('hidden');
+    el.innerHTML = '';
+    return;
+  }
+  const blocks = (stats?.kasBlocks || []).filter(b => (b.kasWallet || '').includes(f));
+  const knownReward = blocks.reduce((sum, block) => sum + (Number(block.rewardSompi) || 0), 0);
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="text-xs text-gray-400">KAS payout wallet</div>
+    <div class="text-sm text-white break-all">${escapeHtmlAttr(f)}</div>
+    <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+      <div class="bg-surface-1 border border-card rounded-lg px-3 py-2"><div class="text-xs text-gray-400">Accepted blocks</div><div class="text-white font-semibold">${blocks.length}</div></div>
+      <div class="bg-surface-1 border border-card rounded-lg px-3 py-2"><div class="text-xs text-gray-400">Known reward</div><div class="text-white font-semibold">${knownReward ? formatKasReward(knownReward) : 'Not reported'}</div></div>
+    </div>`;
+}
+
+function renderKasBlocks(stats) {
+  const filter = getKasWalletFilter();
+  renderKasWalletSummary(stats, filter);
+  let blocks = (stats?.kasBlocks || []).filter(b => !filter || (b.kasWallet || '').includes(filter));
+  blocks = filterBlocksByDays(blocks, getBlocksDayFilter());
+  lastFilteredKasBlocks = blocks;
+  const body = document.getElementById('kasBlocksBody');
+  if (!body) return;
+  body.innerHTML = '';
+  for (const [idx, b] of blocks.entries()) {
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-card/50 cursor-pointer';
+    tr.setAttribute('data-row-kind', 'kas-block');
+    tr.setAttribute('data-row-index', String(idx));
+    tr.innerHTML = `
+      <td class="py-1.5 pr-3">${formatUnixSeconds(b.timestamp)}</td>
+      <td class="py-1.5 pr-3">${escapeHtmlAttr(displayWorkerName(b.worker))}</td>
+      <td class="py-1.5 pr-3"><span class="block max-w-[15rem] truncate" title="${escapeHtmlAttr(b.zkasWallet || '')}">${escapeHtmlAttr(b.zkasWallet || '-')}</span></td>
+      <td class="py-1.5 pr-3"><span class="block max-w-[15rem] truncate" title="${escapeHtmlAttr(b.kasWallet || '')}">${escapeHtmlAttr(b.kasWallet || '-')}</span></td>
+      <td class="py-1.5 pr-3">${escapeHtmlAttr(formatKasReward(b.rewardSompi))}</td>
+      <td class="py-1.5 pr-3"><span class="font-mono" title="${escapeHtmlAttr(b.hash || '')}">${escapeHtmlAttr(shortHash(b.hash))}</span></td>`;
+    body.appendChild(tr);
   }
 }
 
@@ -800,6 +895,7 @@ async function refresh() {
     setLastUpdated(Date.now(), false);
 
     document.getElementById('totalBlocks').textContent = mergedStats.totalBlocks;
+    document.getElementById('totalKasBlocks').textContent = mergedStats.totalKasBlocks ?? 0;
     document.getElementById('totalShares').textContent = mergedStats.totalShares;
     document.getElementById('activeWorkers').textContent = mergedStats.activeWorkers;
     
@@ -840,6 +936,7 @@ async function refresh() {
     const dayFilter = getBlocksDayFilter();
 
     renderWalletSummary(mergedStats, filter);
+    renderKasBlocks(mergedStats);
 
     let blocks = (mergedStats.blocks || []).filter(b => !filter || (b.wallet || '').includes(filter));
     blocks = filterBlocksByDays(blocks, dayFilter);
@@ -936,6 +1033,7 @@ async function refresh() {
         <td class="py-1.5 pr-3">${stale}</td>
         <td class="py-1.5 pr-3">${invalid}</td>
         <td class="py-1.5 pr-3">${Number(icpu.blocksAccepted) || 0}</td>
+        <td class="py-1.5 pr-3">0</td>
         <td class="py-1.5 pr-3">-</td>
         <td class="py-1.5 pr-3">-</td>
         <td class="py-1.5 pr-3">-</td>
@@ -963,6 +1061,7 @@ async function refresh() {
         <td class="py-1.5 pr-3">${w.stale ?? '-'}</td>
         <td class="py-1.5 pr-3">${w.invalid ?? '-'}</td>
         <td class="py-1.5 pr-3">${w.blocks ?? '-'}</td>
+        <td class="py-1.5 pr-3">${w.kasBlocks ?? 0}</td>
         <td class="py-1.5 pr-3">
           ${w.status ? `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${getStatusBgColor(w.status)}"></span><span class="${getStatusColor(w.status)} capitalize">${escapeHtmlAttr(w.status)}</span></span>` : '-'}
         </td>
@@ -992,6 +1091,7 @@ async function refresh() {
       }
 
       document.getElementById('totalBlocks').textContent = displayTotalBlocksFromStats(cached.stats);
+      document.getElementById('totalKasBlocks').textContent = cached.stats.totalKasBlocks ?? (cached.stats.kasBlocks || []).length;
       document.getElementById('totalShares').textContent = cached.stats.totalShares;
       document.getElementById('activeWorkers').textContent = cached.stats.activeWorkers;
       document.getElementById('networkHashrate').textContent = formatHashrateHs(cached.stats.networkHashrate);
@@ -1015,6 +1115,7 @@ async function refresh() {
       const dayFilter = getBlocksDayFilter();
 
       renderWalletSummary(cached.stats, filter);
+      renderKasBlocks(cached.stats);
 
       let blocks = (cached.stats.blocks || []).filter(b => !filter || (b.wallet || '').includes(filter));
       blocks = filterBlocksByDays(blocks, dayFilter);
@@ -1111,6 +1212,7 @@ async function refresh() {
           <td class="py-1.5 pr-3">${stale}</td>
           <td class="py-1.5 pr-3">${invalid}</td>
           <td class="py-1.5 pr-3">${Number(icpu.blocksAccepted) || 0}</td>
+          <td class="py-1.5 pr-3">0</td>
           <td class="py-1.5 pr-3">-</td>
           <td class="py-1.5 pr-3">-</td>
           <td class="py-1.5 pr-3">-</td>
@@ -1138,6 +1240,7 @@ async function refresh() {
           <td class="py-1.5 pr-3">${w.stale ?? '-'}</td>
           <td class="py-1.5 pr-3">${w.invalid ?? '-'}</td>
           <td class="py-1.5 pr-3">${w.blocks ?? '-'}</td>
+          <td class="py-1.5 pr-3">${w.kasBlocks ?? 0}</td>
           <td class="py-1.5 pr-3">
             ${w.status ? `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${getStatusBgColor(w.status)}"></span><span class="${getStatusColor(w.status)} capitalize">${escapeHtmlAttr(w.status)}</span></span>` : '-'}
           </td>
@@ -1215,6 +1318,22 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  if (kind === 'kas-block') {
+    const b = lastFilteredKasBlocks[idx];
+    if (!b) return;
+    openRowDetailModal('KAS Block', [
+      { label: 'Timestamp', value: formatUnixSeconds(b.timestamp), copyValue: b.timestamp },
+      { label: 'Worker', value: displayWorkerName(b.worker), copyValue: b.worker || '' },
+      { label: 'ZKAS wallet', value: b.zkasWallet || '-', copyValue: b.zkasWallet || '' },
+      { label: 'KAS payout wallet', value: b.kasWallet || '-', copyValue: b.kasWallet || '' },
+      { label: 'Reward', value: formatKasReward(b.rewardSompi), copyValue: b.rewardSompi ?? '' },
+      { label: 'Nonce', value: b.nonce || '-', copyValue: b.nonce || '' },
+      { label: 'DAA score', value: b.daaScore || '-', copyValue: b.daaScore || '' },
+      { label: 'Block hash', value: b.hash || '-', copyValue: b.hash || '' },
+    ]);
+    return;
+  }
+
   if (kind === 'worker') {
     const w = lastFilteredWorkers[idx];
     if (!w) return;
@@ -1229,7 +1348,8 @@ document.addEventListener('click', async (e) => {
       { label: 'Shares', value: w.shares ?? '-', copyValue: w.shares ?? '' },
       { label: 'Stale', value: w.stale ?? '-', copyValue: w.stale ?? '' },
       { label: 'Invalid', value: w.invalid ?? '-', copyValue: w.invalid ?? '' },
-      { label: 'Blocks', value: w.blocks ?? '-', copyValue: w.blocks ?? '' },
+      { label: 'ZKAS Blocks', value: w.blocks ?? '-', copyValue: w.blocks ?? '' },
+      { label: 'KAS Blocks', value: w.kasBlocks ?? 0, copyValue: w.kasBlocks ?? 0 },
     ]);
     return;
   }
@@ -1251,7 +1371,7 @@ document.addEventListener('click', async (e) => {
 
 document.getElementById('downloadWorkersCsv').addEventListener('click', () => {
   const rows = [
-    ['instance','worker','wallet','hashrate_ghs','current_difficulty','session_uptime_secs','shares','stale','invalid','blocks'],
+    ['instance','worker','wallet','hashrate_ghs','current_difficulty','session_uptime_secs','shares','stale','invalid','zkas_blocks','kas_blocks'],
     ...lastFilteredWorkers.map(w => [
       w.instance ?? '',
       w.worker ?? '',
@@ -1263,6 +1383,7 @@ document.getElementById('downloadWorkersCsv').addEventListener('click', () => {
       w.stale ?? '',
       w.invalid ?? '',
       w.blocks ?? '',
+      w.kasBlocks ?? 0,
     ]),
   ];
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
@@ -1285,6 +1406,18 @@ document.getElementById('downloadBlocksCsv').addEventListener('click', () => {
   ];
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
   downloadCsv(`blocks-${ts}.csv`, rows);
+});
+
+document.getElementById('downloadKasBlocksCsv').addEventListener('click', () => {
+  const rows = [
+    ['timestamp_unix','timestamp_local','instance','worker','zkas_wallet','kas_wallet','reward_sompi','nonce','daa_score','hash'],
+    ...lastFilteredKasBlocks.map(b => [
+      b.timestamp ?? '', formatUnixSeconds(b.timestamp), b.instance ?? '', b.worker ?? '', b.zkasWallet ?? '', b.kasWallet ?? '',
+      b.rewardSompi ?? '', b.nonce ?? '', b.daaScore ?? '', b.hash ?? '',
+    ]),
+  ];
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  downloadCsv(`kas-blocks-${ts}.csv`, rows);
 });
 
 document.getElementById('refreshBtn').addEventListener('click', refresh);
@@ -1316,6 +1449,20 @@ document.getElementById('refreshBtn').addEventListener('click', refresh);
       if (e.key === 'Enter') doSearch();
     });
   }
+})();
+
+(function initKasWalletSearch() {
+  const input = document.getElementById('kasWalletSearchInput');
+  const searchBtn = document.getElementById('kasWalletSearchBtn');
+  const clearBtn = document.getElementById('kasWalletClearBtn');
+  const persisted = getKasWalletFilterFromStorage();
+  if (input) input.value = persisted;
+  setKasWalletFilter(persisted);
+  const search = () => { setKasWalletFilter(input?.value); refresh(); };
+  const clear = () => { if (input) input.value = ''; setKasWalletFilter(''); refresh(); };
+  searchBtn?.addEventListener('click', search);
+  clearBtn?.addEventListener('click', clear);
+  input?.addEventListener('keydown', (event) => { if (event.key === 'Enter') search(); });
 })();
 
 (function initBlocksDayFilter() {
@@ -1384,6 +1531,7 @@ setInterval(() => {
   }
 
   document.getElementById('totalBlocks').textContent = displayTotalBlocksFromStats(cached.stats);
+  document.getElementById('totalKasBlocks').textContent = cached.stats.totalKasBlocks ?? (cached.stats.kasBlocks || []).length;
   document.getElementById('totalShares').textContent = cached.stats.totalShares;
   document.getElementById('activeWorkers').textContent = cached.stats.activeWorkers;
   document.getElementById('networkHashrate').textContent = formatHashrateHs(cached.stats.networkHashrate);
@@ -1394,6 +1542,7 @@ setInterval(() => {
   const dayFilter = getBlocksDayFilter();
 
   renderWalletSummary(cached.stats, filter);
+  renderKasBlocks(cached.stats);
 
   let blocks = (cached.stats.blocks || []).filter(b => !filter || (b.wallet || '').includes(filter));
   blocks = filterBlocksByDays(blocks, dayFilter);
@@ -1483,6 +1632,7 @@ setInterval(() => {
       <td class="py-1.5 pr-3">${w.stale ?? '-'}</td>
       <td class="py-1.5 pr-3">${w.invalid ?? '-'}</td>
       <td class="py-1.5 pr-3">${w.blocks ?? '-'}</td>
+      <td class="py-1.5 pr-3">${w.kasBlocks ?? 0}</td>
       <td class="py-1.5 pr-3">
         ${w.status ? `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${getStatusBgColor(w.status)}"></span><span class="${getStatusColor(w.status)} capitalize">${escapeHtmlAttr(w.status)}</span></span>` : '-'}
       </td>

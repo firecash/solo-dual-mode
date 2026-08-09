@@ -1786,12 +1786,6 @@ dependencies = [
 
 [[package]]
 name = "faster-hex"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ea2e4ecc921ec2cbb8b10f0d400fe448554779d2ac5e0bfbb065836d9d8483a"
-
-[[package]]
-name = "faster-hex"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2a2b11eda1d40935b26cf18f6833c526845ae8c41e58d09af6adeb6f0269183"
@@ -2780,7 +2774,7 @@ version = "2.0.1"
 source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
 dependencies = [
  "duct",
- "faster-hex 0.9.0",
+ "faster-hex",
 ]
 
 [[package]]
@@ -2810,7 +2804,7 @@ dependencies = [
  "async-channel 2.5.0",
  "bincode",
  "crossbeam-channel",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures-util",
  "indexmap 2.14.0",
  "itertools 0.13.0",
@@ -2855,7 +2849,7 @@ dependencies = [
  "ahash",
  "borsh",
  "cfg-if",
- "faster-hex 0.9.0",
+ "faster-hex",
  "hex",
  "itertools 0.13.0",
  "js-sys",
@@ -2887,7 +2881,7 @@ dependencies = [
  "bitflags 2.13.1",
  "borsh",
  "cfg-if",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures-util",
  "getrandom 0.2.17",
  "itertools 0.13.0",
@@ -2943,7 +2937,7 @@ version = "2.0.1"
 source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
 dependencies = [
  "cfg-if",
- "faster-hex 0.9.0",
+ "faster-hex",
  "js-sys",
  "kaspa-addresses",
  "kaspa-consensus-client",
@@ -3009,7 +3003,7 @@ source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb
 dependencies = [
  "bincode",
  "enum-primitive-derive",
- "faster-hex 0.9.0",
+ "faster-hex",
  "indexmap 2.14.0",
  "itertools 0.13.0",
  "kaspa-hashes",
@@ -3033,7 +3027,7 @@ dependencies = [
  "async-channel 2.5.0",
  "async-stream",
  "async-trait",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures",
  "futures-util",
  "h2",
@@ -3066,7 +3060,7 @@ dependencies = [
  "async-channel 2.5.0",
  "async-stream",
  "async-trait",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures",
  "h2",
  "kaspa-addresses",
@@ -3098,7 +3092,7 @@ dependencies = [
  "async-channel 2.5.0",
  "async-stream",
  "async-trait",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures",
  "h2",
  "itertools 0.13.0",
@@ -3135,7 +3129,7 @@ dependencies = [
  "blake3",
  "borsh",
  "cc",
- "faster-hex 0.9.0",
+ "faster-hex",
  "js-sys",
  "kaspa-utils",
  "keccak",
@@ -3202,7 +3196,7 @@ version = "2.0.1"
 source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
 dependencies = [
  "borsh",
- "faster-hex 0.9.0",
+ "faster-hex",
  "js-sys",
  "kaspa-utils",
  "malachite-base",
@@ -3432,7 +3426,7 @@ dependencies = [
  "cfg-if",
  "derive_more 0.99.20",
  "downcast",
- "faster-hex 0.9.0",
+ "faster-hex",
  "hex",
  "js-sys",
  "kaspa-addresses",
@@ -3582,15 +3576,13 @@ dependencies = [
 
 [[package]]
 name = "kaspa-stratum-bridge"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "anyhow",
  "async-trait",
- "blake2",
  "chrono",
  "clap",
  "dirs",
- "faster-hex 0.1.1",
  "futures-util",
  "hex",
  "include_dir",
@@ -3605,7 +3597,6 @@ dependencies = [
  "kaspa-notify",
  "kaspa-pow",
  "kaspa-rpc-core",
- "kaspa-rpc-service",
  "kaspa-utils",
  "kaspad",
  "katpool-domain",
@@ -3660,7 +3651,7 @@ dependencies = [
  "blake3",
  "borsh",
  "cfg-if",
- "faster-hex 0.9.0",
+ "faster-hex",
  "hexplay",
  "indexmap 2.14.0",
  "itertools 0.13.0",
@@ -3708,7 +3699,7 @@ dependencies = [
  "borsh",
  "cfg-if",
  "event-listener 2.5.3",
- "faster-hex 0.9.0",
+ "faster-hex",
  "ipnet",
  "itertools 0.13.0",
  "log",
@@ -3766,7 +3757,7 @@ name = "kaspa-wasm-core"
 version = "2.0.1"
 source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
 dependencies = [
- "faster-hex 0.9.0",
+ "faster-hex",
  "hexplay",
  "js-sys",
  "wasm-bindgen",
@@ -3812,7 +3803,7 @@ dependencies = [
  "cfg-if",
  "clap",
  "dirs",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures-util",
  "itertools 0.13.0",
  "kaspa-addresses",
@@ -3862,7 +3853,7 @@ dependencies = [
 
 [[package]]
 name = "katpool-domain"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "chrono",
  "hex",
@@ -7354,7 +7345,7 @@ dependencies = [
  "cfg-if",
  "chrono",
  "dirs",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures",
  "getrandom 0.2.17",
  "instant",
@@ -7533,7 +7524,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "799e5fbf266e0fffb5c24d6103735eb2b94bb31f93b664b91eaaf63b4f959804"
 dependencies = [
  "cfg-if",
- "faster-hex 0.9.0",
+ "faster-hex",
  "futures",
  "js-sys",
  "serde",

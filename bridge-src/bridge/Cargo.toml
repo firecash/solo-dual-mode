@@ -38,13 +38,12 @@ kaspa-math = { workspace = true }
 kaspa-pow = { workspace = true }
 kaspa-addresses = { workspace = true }
 kaspa-rpc-core = { workspace = true }
-kaspa-rpc-service = { workspace = true }
 kaspa-grpc-client = { workspace = true }
 kaspa-notify = { workspace = true }
 kaspa-core = { workspace = true }
 kaspa-utils = { workspace = true }
 kaspa-alloc = { workspace = true }
-kaspad = { workspace = true }
+kaspad = { workspace = true, optional = true }
 dirs = { workspace = true }
 
 # External dependencies - using workspace versions where available
@@ -79,7 +78,6 @@ tracing = "0.1"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-blake2 = "0.10"
 num-bigint = "0.4"
 # Use the workspace prometheus (0.14, matching upstream v2.0.0) so the bridge,
 # accountant, and katpool-metrics all share ONE prometheus version — hence one
@@ -90,7 +88,6 @@ prometheus = { workspace = true }
 # Upstream v2.0.0 config parsing (app_config.rs) uses serde_yaml (replaced the
 # old yaml-rust).
 serde_yaml = "0.9"
-faster-hex = "0.1"
 # Embedded dashboard static assets (prom.rs) for portable binaries.
 include_dir = "0.7"
 chrono = { workspace = true }
@@ -109,6 +106,10 @@ tokio-test = "0.4"
 rand = { workspace = true }
 
 [features]
+# The distributed solo-dual bridge connects to the separately managed ZKas
+# node. Keeping the embedded full node optional avoids compiling and shipping
+# an entire second node (and RocksDB) inside every bridge binary.
+inprocess_node = ["dep:kaspad"]
 # Optional in-process CPU miner (upstream v2.0.0). Off by default; the pool
 # never builds it for production.
 rkstratum_cpu_miner = []

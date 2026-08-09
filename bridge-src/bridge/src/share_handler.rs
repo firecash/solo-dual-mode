@@ -215,9 +215,10 @@ async fn submit_parent_then_claim_zkas<T: KaspaApiTrait + ?Sized>(
     kaspa_api: &T,
     solved_parent: &Block,
     job_parent: &Block,
+    clears_zkas: bool,
 ) -> (crate::kaspaapi::MergedParentSubmitOutcome, bool) {
     let parent_outcome = kaspa_api.submit_merged_parent_if_solved(solved_parent).await;
-    let claimed_zkas = kaspa_api.claim_network_solution(job_parent);
+    let claimed_zkas = clears_zkas && kaspa_api.claim_network_solution(job_parent);
     (parent_outcome, claimed_zkas)
 }
 
@@ -888,7 +889,7 @@ impl ShareHandler {
             // Go code compares: powValue.Cmp(&powState.Target) <= 0 where Target is network target from header.bits
             // We calculate network_target directly from current job's header.bits (not from stored state)
             // This ensures we use the correct target for each job, as different jobs may have different header.bits
-            if meets_network_target {
+            if meets_network_target || (merged_mode && check_passed) {
                 let wallet_addr = ctx.wallet_addr.lock().clone();
                 let worker_name = ctx.effective_worker_name();
                 let prefix = self.log_prefix();
@@ -904,13 +905,58 @@ impl ShareHandler {
                 let transactions_vec = current_job.block.transactions.iter().cloned().collect();
                 let block = Block::from_arcs(Arc::new(header_clone), Arc::new(transactions_vec));
 
-                let (parent_outcome, claimed_zkas) =
-                    submit_parent_then_claim_zkas(kaspa_api.as_ref(), &block, &current_job.block).await;
+                let (parent_outcome, claimed_zkas) = submit_parent_then_claim_zkas(
+                    kaspa_api.as_ref(),
+                    &block,
+                    &current_job.block,
+                    meets_network_target,
+                )
+                .await;
                 crate::prom::record_merged_parent_submit(
                     &self.worker_prom_context(&ctx, ""),
                     &parent_outcome,
                     claimed_zkas,
+                    &block,
                 );
+                match &parent_outcome {
+                    crate::kaspaapi::MergedParentSubmitOutcome::Accepted { hash, payout_wallet } => info!(
+                        "{} KAS BLOCK ACCEPTED worker={} zkas_wallet={} kas_wallet={} hash={}",
+                        LogColors::block("[KAS BLOCK]"),
+                        worker_name,
+                        wallet_addr,
+                        payout_wallet,
+                        hash
+                    ),
+                    crate::kaspaapi::MergedParentSubmitOutcome::Rejected { hash, reason } => warn!(
+                        "{} KAS block rejected worker={} hash={} reason={}",
+                        LogColors::block("[KAS BLOCK]"),
+                        worker_name,
+                        hash,
+                        reason
+                    ),
+                    crate::kaspaapi::MergedParentSubmitOutcome::TransportError { hash, error } => warn!(
+                        "{} KAS submit failed worker={} hash={} error={}",
+                        LogColors::block("[KAS BLOCK]"),
+                        worker_name,
+                        hash,
+                        error
+                    ),
+                    crate::kaspaapi::MergedParentSubmitOutcome::NoKaspaClient => warn!(
+                        "{} parent target passed but no Kaspa client is configured",
+                        LogColors::block("[KAS BLOCK]")
+                    ),
+                    crate::kaspaapi::MergedParentSubmitOutcome::NotMerged
+                    | crate::kaspaapi::MergedParentSubmitOutcome::DoesNotClearKaspa => {}
+                }
+
+                // The two chain targets are independent. If this nonce clears
+                // only the Kaspa parent target, its KAS block has already been
+                // submitted and recorded above. Credit the Stratum share but do
+                // not claim or submit a ZKAS block it did not solve.
+                if !meets_network_target {
+                    invalid_share = false;
+                    break;
+                }
 
                 // In merged mode many distinct parent nonces can prove the same
                 // fixed ZKAS `H_fc`, but that ZKAS block can pay only once.
@@ -929,7 +975,7 @@ impl ShareHandler {
                 info!(
                     "{} {} {}",
                     prefix,
-                    LogColors::block("===== BLOCK FOUND! ====="),
+                    LogColors::block("===== ZKAS BLOCK FOUND! ====="),
                     format!("Worker: {}, Wallet: {}, Nonce: {:x}", worker_name, wallet_addr, nonce_val)
                 );
                 debug!(
@@ -1037,7 +1083,7 @@ impl ShareHandler {
                 }
 
                 // Log prominent "Block Found" message with hash
-                info!("{} {} {}", prefix, LogColors::block("BLOCK FOUND!"), format!("Hash: {}", block_hash));
+                info!("{} {} {}", prefix, LogColors::block("ZKAS BLOCK FOUND!"), format!("Hash: {}", block_hash));
                 debug!("{} {} {} {}", prefix, LogColors::block("[BLOCK]"), LogColors::label("Worker:"), worker_name);
                 debug!("{} {} {} {}", prefix, LogColors::block("[BLOCK]"), LogColors::label("Wallet:"), wallet_addr);
                 debug!("{} {} {} {}", prefix, LogColors::block("[BLOCK]"), LogColors::label("Nonce:"), format!("{:x}", nonce_val));
@@ -1118,7 +1164,7 @@ impl ShareHandler {
                             "{} {} {}",
                             prefix,
                             LogColors::block("[BLOCK]"),
-                            LogColors::block(&format!("BLOCK ACCEPTED BY NODE! Hash: {}", block_hash))
+                            LogColors::block(&format!("ZKAS BLOCK ACCEPTED BY NODE! Hash: {}", block_hash))
                         );
                         info!("{} {} {} {}", prefix, LogColors::block("[BLOCK]"), LogColors::label("  - Worker:"), worker_name);
                         info!(
@@ -2088,7 +2134,10 @@ mod merged_settlement_order_tests {
 
         async fn submit_merged_parent_if_solved(&self, _parent: &Block) -> MergedParentSubmitOutcome {
             self.calls.lock().push("parent");
-            MergedParentSubmitOutcome::Accepted
+            MergedParentSubmitOutcome::Accepted {
+                hash: "07".repeat(32),
+                payout_wallet: "kaspa:test".to_string(),
+            }
         }
 
         fn claim_network_solution(&self, _job_block: &Block) -> bool {
@@ -2116,15 +2165,27 @@ mod merged_settlement_order_tests {
         let parent = Block::new(Header::from_precomputed_hash(Hash::from_bytes([7; 32]), vec![]), vec![]);
         let api = AlreadyClaimedApi { calls: Mutex::new(vec![]) };
 
-        let (outcome, claimed_zkas) = submit_parent_then_claim_zkas(&api, &parent, &parent).await;
+        let (outcome, claimed_zkas) = submit_parent_then_claim_zkas(&api, &parent, &parent, true).await;
 
-        assert_eq!(outcome, MergedParentSubmitOutcome::Accepted);
+        assert!(matches!(outcome, MergedParentSubmitOutcome::Accepted { .. }));
         assert!(!claimed_zkas, "fixture represents an H_fc already claimed by an earlier nonce");
         assert_eq!(
             api.calls.lock().as_slice(),
             ["parent", "claim"],
             "Kaspa submission must never be gated behind ZKAS deduplication"
         );
+    }
+
+    #[tokio::test]
+    async fn kas_only_solution_never_claims_zkas() {
+        let parent = Block::new(Header::from_precomputed_hash(Hash::from_bytes([8; 32]), vec![]), vec![]);
+        let api = AlreadyClaimedApi { calls: Mutex::new(vec![]) };
+
+        let (outcome, claimed_zkas) = submit_parent_then_claim_zkas(&api, &parent, &parent, false).await;
+
+        assert!(matches!(outcome, MergedParentSubmitOutcome::Accepted { .. }));
+        assert!(!claimed_zkas);
+        assert_eq!(api.calls.lock().as_slice(), ["parent"], "KAS-only work must not consume the ZKAS H_fc claim");
     }
 }
 

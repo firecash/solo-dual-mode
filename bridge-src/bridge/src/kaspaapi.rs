@@ -69,9 +69,9 @@ pub enum MergedParentSubmitOutcome {
     NotMerged,
     DoesNotClearKaspa,
     NoKaspaClient,
-    Accepted,
-    Rejected(String),
-    TransportError(String),
+    Accepted { hash: String, payout_wallet: String },
+    Rejected { hash: String, reason: String },
+    TransportError { hash: String, error: String },
 }
 
 impl MergedParentSubmitOutcome {
@@ -80,9 +80,9 @@ impl MergedParentSubmitOutcome {
             Self::NotMerged => "not_merged",
             Self::DoesNotClearKaspa => "does_not_clear",
             Self::NoKaspaClient => "no_client",
-            Self::Accepted => "accepted",
-            Self::Rejected(_) => "rejected",
-            Self::TransportError(_) => "transport_error",
+            Self::Accepted { .. } => "accepted",
+            Self::Rejected { .. } => "rejected",
+            Self::TransportError { .. } => "transport_error",
         }
     }
 }
@@ -727,23 +727,29 @@ impl KaspaApi {
         };
 
         let kaspa_hash = kaspa_consensus_core::hashing::header::hash(&parent.header).to_string();
+        let payout_wallet = self.kaspa_pay.as_ref().map(ToString::to_string).unwrap_or_default();
+        info!(
+            "{} KAS block candidate hash={} payout={}",
+            LogColors::block("[MERGED]"),
+            kaspa_hash,
+            payout_wallet
+        );
         let rpc_parent: RpcRawBlock = parent.into();
         match kc.submit_block_call(None, SubmitBlockRequest::new(rpc_parent, false)).await {
             Ok(response) => match response.report {
                 SubmitBlockReport::Success => {
-                    info!("{} KASPA BLOCK FOUND & accepted! hash={}", LogColors::block("[MERGED]"), kaspa_hash);
-                    MergedParentSubmitOutcome::Accepted
+                    MergedParentSubmitOutcome::Accepted { hash: kaspa_hash, payout_wallet }
                 }
                 SubmitBlockReport::Reject(reason) => {
                     let reason = format!("{reason:?}");
                     warn!("{} Kaspa block rejected ({}) hash={}", LogColors::block("[MERGED]"), reason, kaspa_hash);
-                    MergedParentSubmitOutcome::Rejected(reason)
+                    MergedParentSubmitOutcome::Rejected { hash: kaspa_hash, reason }
                 }
             },
             Err(error) => {
                 let error = error.to_string();
-                warn!("{} Kaspa submit transport error: {}", LogColors::block("[MERGED]"), error);
-                MergedParentSubmitOutcome::TransportError(error)
+                warn!("{} Kaspa submit transport error hash={}: {}", LogColors::block("[MERGED]"), kaspa_hash, error);
+                MergedParentSubmitOutcome::TransportError { hash: kaspa_hash, error }
             }
         }
     }
@@ -1645,7 +1651,7 @@ mod submit_block_report_tests {
 
     #[test]
     fn success_report_resolves_to_accepted() {
-        let resp = SubmitBlockResponse { report: SubmitBlockReport::Success };
+        let resp = SubmitBlockResponse::success();
         let out = classify(resp);
         assert!(out.is_accepted(), "Success must produce BlockSubmitOutcome::Accepted");
         match out {
@@ -1663,7 +1669,7 @@ mod submit_block_report_tests {
         // regression). Reject(*) must stay Ok(RejectedByNode(_))
         // so the share-handler credits the share and only the
         // BlockAccepted event is suppressed.
-        let resp = SubmitBlockResponse { report: SubmitBlockReport::Reject(SubmitBlockRejectReason::BlockInvalid) };
+        let resp = SubmitBlockResponse::reject(SubmitBlockRejectReason::BlockInvalid, "test");
         let out = classify(resp);
         assert!(!out.is_accepted(), "Reject(BlockInvalid) must NOT be Accepted");
         match out {
@@ -1674,7 +1680,7 @@ mod submit_block_report_tests {
 
     #[test]
     fn reject_is_in_ibd_resolves_to_rejected() {
-        let resp = SubmitBlockResponse { report: SubmitBlockReport::Reject(SubmitBlockRejectReason::IsInIBD) };
+        let resp = SubmitBlockResponse::reject(SubmitBlockRejectReason::IsInIBD, "test");
         match classify(resp) {
             BlockSubmitOutcome::RejectedByNode(SubmitBlockRejectReason::IsInIBD) => {}
             other => panic!("expected RejectedByNode(IsInIBD), got {other:?}"),
@@ -1683,7 +1689,7 @@ mod submit_block_report_tests {
 
     #[test]
     fn reject_route_is_full_resolves_to_rejected() {
-        let resp = SubmitBlockResponse { report: SubmitBlockReport::Reject(SubmitBlockRejectReason::RouteIsFull) };
+        let resp = SubmitBlockResponse::reject(SubmitBlockRejectReason::RouteIsFull, "test");
         match classify(resp) {
             BlockSubmitOutcome::RejectedByNode(SubmitBlockRejectReason::RouteIsFull) => {}
             other => panic!("expected RejectedByNode(RouteIsFull), got {other:?}"),

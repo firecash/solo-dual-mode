@@ -13,8 +13,10 @@ This is deliberately **not a pooled-mining installation**:
 - an optional local Kaspa node enables AuxPoW merged mining (one hash can earn
   KAS and ZKAS).
 
-Linux (systemd) and Windows (PowerShell) are supported. Linux gets managed
-systemd services; Windows gets a portable foreground runner. Each node can be
+Prebuilt bridge binaries are published for Linux, macOS, and Windows on both
+x64 and ARM64. Linux gets managed systemd services; Windows gets a portable
+PowerShell foreground runner. macOS uses the same bridge configuration and
+currently runs it directly from Terminal. Each node can be
 independently **managed** (downloaded and supervised by this kit) or
 **external** (an existing node selected by RPC host/port). The bridge can use
 ZKas managed + Kaspa managed, ZKas managed + Kaspa external, native-only, or
@@ -38,6 +40,29 @@ The bridge always submits native ZKas blocks to the ZKas node. When merged
 mining is enabled, the bridge also obtains a Kaspa parent template and submits
 Kaspa-target-clearing results to both nodes. Native ZKas mining remains valid if
 the Kaspa parent is unavailable.
+
+The local dashboard records the two chains independently. It shows separate
+ZKAS and KAS block totals and histories, worker attribution, timestamps, block
+hashes, the configured KAS payout wallet, and independent ZKAS/KAS wallet
+searches. A valid KAS-only solution is submitted even when the same hash does
+not clear the ZKAS target. KAS reward is shown only when the parent node can
+report it; otherwise the dashboard labels it pending/unavailable rather than
+guessing a value.
+
+## Release packages
+
+| Platform | Package |
+|---|---|
+| Linux x64 | `solo-dual-mode-linux-x64.zip` (portable MUSL binary) |
+| Linux ARM64 | `solo-dual-mode-linux-arm64.zip` |
+| macOS Intel | `solo-dual-mode-macos-x64.zip` |
+| macOS Apple Silicon | `solo-dual-mode-macos-arm64.zip` |
+| Windows x64 | `solo-dual-mode-windows-x64.zip` |
+| Windows ARM64 | `solo-dual-mode-windows-arm64.zip` |
+
+Every release includes `SHA256SUMS`. The six packages are produced on native
+GitHub-hosted runners; a release is not published if any platform build or
+merged-mining capability check fails.
 
 ## Quick start from this checkout
 
@@ -140,8 +165,9 @@ git clone https://github.com/kaspanet/rusty-kaspa.git
 cd rusty-kaspa && git checkout v2.0.1 && cargo build --release -p kaspad
 
 # Bridge
-git clone https://github.com/firecash/zkas-pool.git
-cd zkas-pool && cargo build --release --bin stratum-bridge
+git clone https://github.com/firecash/solo-dual-mode.git
+cd solo-dual-mode
+cargo build --locked --release --manifest-path bridge-src/Cargo.toml --bin stratum-bridge
 ```
 
 Then export the binary paths before running `./setup.sh`:
@@ -149,7 +175,7 @@ Then export the binary paths before running `./setup.sh`:
 ```bash
 export ZKAS_NODE_BIN=/path/to/zkas-rusty/target/release/kaspad
 export KASPA_NODE_BIN=/path/to/rusty-kaspa/target/release/kaspad
-export BRIDGE_BIN=/path/to/zkas-pool/target/release/stratum-bridge
+export BRIDGE_BIN=/path/to/solo-dual-mode/bridge-src/target/release/stratum-bridge
 ./setup.sh
 ```
 

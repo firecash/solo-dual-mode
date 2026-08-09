@@ -24,6 +24,24 @@ const INVALID_LABELS: &[&str] = &["instance", "worker", "miner", "wallet", "ip",
 /// Block labels
 const BLOCK_LABELS: &[&str] = &["instance", "worker", "miner", "wallet", "ip", "nonce", "bluescore", "timestamp", "hash"];
 
+/// Accepted Kaspa parent block labels. `zkas_wallet` identifies the Stratum
+/// login that supplied the work; `kas_wallet` is the configured parent-chain
+/// coinbase payout. Reward stays optional because Kaspa's DAG reward is known
+/// only after a later merging block includes this block.
+const KAS_BLOCK_LABELS: &[&str] = &[
+    "instance",
+    "worker",
+    "miner",
+    "zkas_wallet",
+    "kas_wallet",
+    "ip",
+    "nonce",
+    "daa_score",
+    "timestamp",
+    "hash",
+    "reward_sompi",
+];
+
 /// Error labels
 const ERROR_LABELS: &[&str] = &["instance", "wallet", "error"];
 
@@ -48,6 +66,10 @@ static BLOCK_NOT_CONFIRMED_BLUE_COUNTER: OnceLock<CounterVec> = OnceLock::new();
 
 /// Independent merged-mining Kaspa-parent outcomes.
 static MERGED_PARENT_SUBMIT_COUNTER: OnceLock<CounterVec> = OnceLock::new();
+
+/// Accepted Kaspa parent blocks, separate from native ZKAS block accounting.
+static KAS_BLOCK_COUNTER: OnceLock<CounterVec> = OnceLock::new();
+static KAS_BLOCK_GAUGE: OnceLock<GaugeVec> = OnceLock::new();
 
 /// Block gauge - unique instances per block mined
 static BLOCK_GAUGE: OnceLock<GaugeVec> = OnceLock::new();
@@ -168,6 +190,24 @@ pub fn init_metrics() {
             "ks_merged_parent_submit_total",
             "Independent Kaspa parent submission outcomes, including whether the same solution won the ZKAS claim",
             &["instance", "worker", "wallet", "outcome", "zkas_claim"]
+        )
+        .unwrap()
+    });
+
+    KAS_BLOCK_COUNTER.get_or_init(|| {
+        register_counter_vec!(
+            "ks_merged_kas_blocks_accepted_total",
+            "Kaspa parent blocks accepted by the configured Kaspa node",
+            &["instance", "worker", "miner", "zkas_wallet", "kas_wallet", "ip"]
+        )
+        .unwrap()
+    });
+
+    KAS_BLOCK_GAUGE.get_or_init(|| {
+        register_gauge_vec!(
+            "ks_merged_kas_blocks_gauge",
+            "Accepted Kaspa parent block records for the merged-mining dashboard",
+            KAS_BLOCK_LABELS
         )
         .unwrap()
     });
@@ -689,6 +729,7 @@ pub fn record_merged_parent_submit(
     worker: &WorkerContext,
     outcome: &crate::kaspaapi::MergedParentSubmitOutcome,
     claimed_zkas: bool,
+    parent: &kaspa_consensus_core::block::Block,
 ) {
     if matches!(
         outcome,
@@ -708,6 +749,37 @@ pub fn record_merged_parent_submit(
                 zkas_claim,
             ])
             .inc();
+    }
+
+    if let crate::kaspaapi::MergedParentSubmitOutcome::Accepted { hash, payout_wallet } = outcome {
+        let base = [
+            worker.instance_id.as_str(),
+            worker.worker_name.as_str(),
+            worker.miner.as_str(),
+            worker.wallet.as_str(),
+            payout_wallet.as_str(),
+            worker.ip.as_str(),
+        ];
+        if let Some(counter) = KAS_BLOCK_COUNTER.get() {
+            counter.with_label_values(&base).inc();
+        }
+        if let Some(gauge) = KAS_BLOCK_GAUGE.get() {
+            let nonce = parent.header.nonce.to_string();
+            let daa_score = parent.header.daa_score.to_string();
+            let timestamp = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs()
+                .to_string();
+            // The actual Kaspa DAG reward is deliberately left unknown here.
+            // It is paid by a later merging block, so the candidate template
+            // cannot provide an honest value at submit time.
+            gauge
+                .with_label_values(&[
+                    base[0], base[1], base[2], base[3], base[4], base[5], &nonce, &daa_score, &timestamp, hash, "",
+                ])
+                .set(1.0);
+        }
     }
 }
 
@@ -1018,6 +1090,7 @@ struct InternalCpuStats {
 #[allow(non_snake_case)]
 struct StatsResponse {
     totalBlocks: u64,
+    totalKasBlocks: u64,
     totalShares: u64,
     networkHashrate: u64,
     networkDifficulty: f64,
@@ -1025,6 +1098,7 @@ struct StatsResponse {
     activeWorkers: usize,
     internalCpu: Option<InternalCpuStats>,
     blocks: Vec<BlockInfo>,
+    kasBlocks: Vec<KasBlockInfo>,
     workers: Vec<WorkerInfo>,
     #[serde(skip_serializing_if = "Option::is_none")]
     bridgeUptime: Option<u64>, // Bridge uptime in seconds
@@ -1042,6 +1116,20 @@ struct BlockInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct KasBlockInfo {
+    instance: String,
+    worker: String,
+    zkasWallet: String,
+    kasWallet: String,
+    timestamp: String,
+    hash: String,
+    nonce: String,
+    daaScore: String,
+    rewardSompi: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct WorkerInfo {
     instance: String,
     worker: String,
@@ -1051,6 +1139,8 @@ struct WorkerInfo {
     stale: u64,
     invalid: u64,
     blocks: u64,
+    #[serde(rename = "kasBlocks")]
+    kas_blocks: u64,
     #[serde(skip_serializing_if = "Option::is_none", rename = "lastSeen")]
     last_seen: Option<u64>, // Unix timestamp in seconds
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1088,6 +1178,7 @@ fn new_worker_info(instance: String, worker: String, wallet: String) -> WorkerIn
         stale: 0,
         invalid: 0,
         blocks: 0,
+        kas_blocks: 0,
         last_seen: None,
         status: None,
         current_difficulty: None,
@@ -1109,6 +1200,7 @@ async fn get_stats_json_filtered(instance_id: Option<&str>) -> StatsResponse {
     };
     let mut stats = StatsResponse {
         totalBlocks: 0,
+        totalKasBlocks: 0,
         totalShares: 0,
         networkHashrate: 0,
         networkDifficulty: 0.0,
@@ -1116,6 +1208,7 @@ async fn get_stats_json_filtered(instance_id: Option<&str>) -> StatsResponse {
         activeWorkers: 0,
         internalCpu: None,
         blocks: Vec::new(),
+        kasBlocks: Vec::new(),
         workers: Vec::new(),
         bridgeUptime: None,
     };
@@ -1125,6 +1218,7 @@ async fn get_stats_json_filtered(instance_id: Option<&str>) -> StatsResponse {
     let mut worker_start_times: HashMap<String, f64> = HashMap::new(); // Store start times for hashrate calculation
     let mut worker_difficulties: HashMap<String, f64> = HashMap::new(); // Store current difficulty for each worker
     let mut block_set: HashSet<String> = HashSet::new();
+    let mut kas_block_set: HashSet<String> = HashSet::new();
 
     // Parse global network gauges from the unfiltered set.
     // Also pick up internal CPU miner metrics (if present).
@@ -1215,6 +1309,76 @@ async fn get_stats_json_filtered(instance_id: Option<&str>) -> StatsResponse {
 
     for family in families_for_workers_and_blocks {
         let name = family.name();
+
+        // Parse accepted Kaspa parent records independently from ZKAS blocks.
+        if name == "ks_merged_kas_blocks_gauge" {
+            for metric in family.get_metric() {
+                if metric.get_gauge().value() <= 0.0 {
+                    continue;
+                }
+                let mut instance = String::new();
+                let mut worker = String::new();
+                let mut zkas_wallet = String::new();
+                let mut kas_wallet = String::new();
+                let mut timestamp = String::new();
+                let mut hash = String::new();
+                let mut nonce = String::new();
+                let mut daa_score = String::new();
+                let mut reward_sompi = None;
+                for label in metric.get_label() {
+                    match label.name() {
+                        "instance" => instance = label.value().to_string(),
+                        "worker" => worker = label.value().to_string(),
+                        "zkas_wallet" => zkas_wallet = label.value().to_string(),
+                        "kas_wallet" => kas_wallet = label.value().to_string(),
+                        "timestamp" => timestamp = label.value().to_string(),
+                        "hash" => hash = label.value().to_string(),
+                        "nonce" => nonce = label.value().to_string(),
+                        "daa_score" => daa_score = label.value().to_string(),
+                        "reward_sompi" => reward_sompi = label.value().parse::<u64>().ok(),
+                        _ => {}
+                    }
+                }
+                if !hash.is_empty() && kas_block_set.insert(hash.clone()) {
+                    stats.kasBlocks.push(KasBlockInfo {
+                        instance,
+                        worker,
+                        zkasWallet: zkas_wallet,
+                        kasWallet: kas_wallet,
+                        timestamp,
+                        hash,
+                        nonce,
+                        daaScore: daa_score,
+                        rewardSompi: reward_sompi,
+                    });
+                    stats.totalKasBlocks = stats.totalKasBlocks.saturating_add(1);
+                }
+            }
+        }
+
+        if name == "ks_merged_kas_blocks_accepted_total" {
+            for metric in family.get_metric() {
+                let mut instance = String::new();
+                let mut worker_key = String::new();
+                let mut zkas_wallet = String::new();
+                for label in metric.get_label() {
+                    match label.name() {
+                        "instance" => instance = label.value().to_string(),
+                        "worker" => worker_key = label.value().to_string(),
+                        "zkas_wallet" => zkas_wallet = label.value().to_string(),
+                        _ => {}
+                    }
+                }
+                if !worker_key.is_empty() {
+                    let key = format!("{}:{}:{}", instance, worker_key, zkas_wallet);
+                    let count = metric.get_counter().value() as u64;
+                    let entry = worker_stats
+                        .entry(key)
+                        .or_insert_with(|| new_worker_info(instance, worker_key, zkas_wallet));
+                    entry.kas_blocks = entry.kas_blocks.saturating_add(count);
+                }
+            }
+        }
 
         // Parse block gauge
         if name == "ks_mined_blocks_gauge" {
@@ -1532,6 +1696,12 @@ async fn get_stats_json_filtered(instance_id: Option<&str>) -> StatsResponse {
         b_score.cmp(&a_score)
     });
 
+    stats.kasBlocks.sort_by(|a, b| {
+        let a_ts: u64 = a.timestamp.parse().unwrap_or(0);
+        let b_ts: u64 = b.timestamp.parse().unwrap_or(0);
+        b_ts.cmp(&a_ts)
+    });
+
     // Sort workers by blocks (most blocks first)
     stats.workers.sort_by_key(|worker| std::cmp::Reverse(worker.blocks));
 
@@ -1702,6 +1872,8 @@ pub async fn start_prom_server(port: &str, instance_id: &str) -> Result<(), Box<
 #[cfg(test)]
 mod tests {
     use super::*;
+    use kaspa_consensus_core::{block::Block, header::Header};
+    use kaspa_hashes::Hash;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
     use tokio::io::AsyncReadExt;
@@ -1725,6 +1897,38 @@ mod tests {
     fn temp_config_path() -> PathBuf {
         let nanos = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
         std::env::temp_dir().join(format!("rkstratum_config_test_{}_{}.yaml", std::process::id(), nanos))
+    }
+
+    #[tokio::test]
+    async fn accepted_kas_parent_is_exposed_separately() {
+        init_metrics();
+        let unique = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
+        let instance = format!("kas-stats-{unique}");
+        let hash = format!("{:064x}", unique);
+        let payout_wallet = "kaspa:test-parent-wallet".to_string();
+        let worker = WorkerContext {
+            instance_id: instance.clone(),
+            worker_name: "asic-1".to_string(),
+            miner: "test-miner".to_string(),
+            wallet: "zkas:test-worker-wallet".to_string(),
+            ip: "127.0.0.1:5555".to_string(),
+        };
+        let parent = Block::new(Header::from_precomputed_hash(Hash::from_bytes([9; 32]), vec![]), vec![]);
+        let outcome = crate::kaspaapi::MergedParentSubmitOutcome::Accepted {
+            hash: hash.clone(),
+            payout_wallet: payout_wallet.clone(),
+        };
+
+        record_merged_parent_submit(&worker, &outcome, false, &parent);
+        let stats = get_stats_json_filtered(Some(&instance)).await;
+
+        assert_eq!(stats.totalKasBlocks, 1);
+        assert_eq!(stats.totalBlocks, 0, "a KAS-only solution must not increment ZKAS blocks");
+        assert_eq!(stats.kasBlocks.len(), 1);
+        assert_eq!(stats.kasBlocks[0].hash, hash);
+        assert_eq!(stats.kasBlocks[0].kasWallet, payout_wallet);
+        assert_eq!(stats.kasBlocks[0].worker, "asic-1");
+        assert_eq!(stats.kasBlocks[0].zkasWallet, "zkas:test-worker-wallet");
     }
 
     #[tokio::test]
