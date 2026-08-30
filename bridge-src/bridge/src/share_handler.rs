@@ -2045,6 +2045,10 @@ pub trait KaspaApiTrait: Send + Sync {
         canxium_addr: &str,
         session_uid: u64,
         generation: u64,
+        // `kas_payout`: the lane's own `kaspa:` payout from the stratum password;
+        // `None` pays the operator's `ZKAS_KASPA_PAY`. `lane_id`: selects the lane.
+        kas_payout: Option<kaspa_addresses::Address>,
+        lane_id: u64,
     ) -> Result<Block, Box<dyn std::error::Error + Send + Sync>>;
 
     async fn submit_block(
@@ -2095,8 +2099,19 @@ pub trait KaspaApiTrait: Send + Sync {
         true
     }
 
-    async fn refresh_merged_parent(&self, _current_parent: &Block) -> Result<Option<Block>, Box<dyn std::error::Error + Send + Sync>> {
+    async fn refresh_merged_parent(
+        &self,
+        _current_parent: &Block,
+        _payee: Option<kaspa_addresses::Address>,
+    ) -> Result<Option<Block>, Box<dyn std::error::Error + Send + Sync>> {
         Ok(None)
+    }
+
+    /// Whether the committed ZKas lane for this parent was paid to the operator
+    /// rather than to a miner's own `kaspa:` address. Default `false` keeps
+    /// non-merged mocks source-compatible.
+    fn merged_lane_paid_pool(&self, _parent_block: &Block) -> bool {
+        false
     }
 }
 
@@ -2121,6 +2136,8 @@ mod merged_settlement_order_tests {
             _canxium_addr: &str,
             _session_uid: u64,
             _generation: u64,
+            _kas_payout: Option<kaspa_addresses::Address>,
+            _lane_id: u64,
         ) -> Result<Block, Box<dyn std::error::Error + Send + Sync>> {
             unreachable!("template fetch is outside this regression")
         }

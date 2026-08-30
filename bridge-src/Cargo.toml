@@ -4,7 +4,7 @@ members = ["bridge", "crates/katpool-domain"]
 exclude = ["bridge/fuzz"]
 
 [workspace.package]
-version = "1.0.7"
+version = "1.0.8"
 edition = "2024"
 rust-version = "1.91.0"
 license = "MIT OR Apache-2.0"

@@ -1,0 +1,5 @@
+# Cargo build output for the vendored bridge source.
+bridge-src/target/
+
+# Runtime state written by setup.sh / run.sh next to the binaries.
+*.log

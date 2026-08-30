@@ -3576,7 +3576,7 @@ dependencies = [
 
 [[package]]
 name = "kaspa-stratum-bridge"
-version = "1.0.7"
+version = "1.0.8"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3853,7 +3853,7 @@ dependencies = [
 
 [[package]]
 name = "katpool-domain"
-version = "1.0.7"
+version = "1.0.8"
 dependencies = [
  "chrono",
  "hex",

@@ -185,8 +185,18 @@ administrator privileges. A Windows service wrapper can be added later without
 changing the node or bridge configuration.
 
 Point miners at `stratum+tcp://<host>:5555`, using their full `zkas:` address
-as username and `x` as password. Do not expose the node RPC ports to the
-internet. Open P2P `16811` if this is intended to be a public node.
+as username.
+
+The password field is optional and carries the miner's **Kaspa** payout
+address. When merged mining is on, a miner that sends a valid `kaspa:` address
+as its password is paid the parent-block reward directly for the Kaspa blocks
+its own shares solve; anything else (`x`, empty, a worker name) falls back to
+the operator's `ZKAS_KASPA_PAY` address, which is the previous behaviour. The
+address is never inferred from the username -- an unparseable password is
+treated as absent, not as an error.
+
+Do not expose the node RPC ports to the internet. Open P2P `16811` if this is
+intended to be a public node.
 
 ## Mainnet safety rules
 
