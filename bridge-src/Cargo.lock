@@ -2726,7 +2726,7 @@ dependencies = [
 [[package]]
 name = "kaspa-addresses"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "borsh",
  "js-sys",
@@ -2741,7 +2741,7 @@ dependencies = [
 [[package]]
 name = "kaspa-addressmanager"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "borsh",
  "igd-next",
@@ -2763,7 +2763,7 @@ dependencies = [
 [[package]]
 name = "kaspa-alloc"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "mimalloc",
 ]
@@ -2771,7 +2771,7 @@ dependencies = [
 [[package]]
 name = "kaspa-build-info"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "duct",
  "faster-hex",
@@ -2780,7 +2780,7 @@ dependencies = [
 [[package]]
 name = "kaspa-connectionmanager"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "duration-string",
  "futures-util",
@@ -2798,7 +2798,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensus"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "arc-swap",
  "async-channel 2.5.0",
@@ -2844,7 +2844,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensus-client"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "ahash",
  "borsh",
@@ -2874,7 +2874,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensus-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "arc-swap",
  "async-trait",
@@ -2914,7 +2914,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensus-notify"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "cfg-if",
@@ -2934,7 +2934,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensus-wasm"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "cfg-if",
  "faster-hex",
@@ -2959,7 +2959,7 @@ dependencies = [
 [[package]]
 name = "kaspa-consensusmanager"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "duration-string",
  "futures",
@@ -2979,7 +2979,7 @@ dependencies = [
 [[package]]
 name = "kaspa-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "anyhow",
  "cfg-if",
@@ -2999,7 +2999,7 @@ dependencies = [
 [[package]]
 name = "kaspa-database"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "bincode",
  "enum-primitive-derive",
@@ -3022,7 +3022,7 @@ dependencies = [
 [[package]]
 name = "kaspa-grpc-client"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-stream",
@@ -3055,7 +3055,7 @@ dependencies = [
 [[package]]
 name = "kaspa-grpc-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-stream",
@@ -3087,7 +3087,7 @@ dependencies = [
 [[package]]
 name = "kaspa-grpc-server"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-stream",
@@ -3123,7 +3123,7 @@ dependencies = [
 [[package]]
 name = "kaspa-hashes"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "blake2b_simd",
  "blake3",
@@ -3147,7 +3147,7 @@ dependencies = [
 [[package]]
 name = "kaspa-index-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-trait",
@@ -3167,7 +3167,7 @@ dependencies = [
 [[package]]
 name = "kaspa-index-processor"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-trait",
@@ -3193,7 +3193,7 @@ dependencies = [
 [[package]]
 name = "kaspa-math"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "borsh",
  "faster-hex",
@@ -3213,7 +3213,7 @@ dependencies = [
 [[package]]
 name = "kaspa-merkle"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-hashes",
 ]
@@ -3221,7 +3221,7 @@ dependencies = [
 [[package]]
 name = "kaspa-mining"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "futures-util",
  "hex",
@@ -3249,7 +3249,7 @@ dependencies = [
 [[package]]
 name = "kaspa-mining-errors"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-consensus-core",
  "thiserror 2.0.19",
@@ -3258,7 +3258,7 @@ dependencies = [
 [[package]]
 name = "kaspa-muhash"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-hashes",
  "kaspa-math",
@@ -3269,7 +3269,7 @@ dependencies = [
 [[package]]
 name = "kaspa-notify"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-trait",
@@ -3301,7 +3301,7 @@ dependencies = [
 [[package]]
 name = "kaspa-p2p-flows"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3338,7 +3338,7 @@ dependencies = [
 [[package]]
 name = "kaspa-p2p-lib"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "borsh",
  "ctrlc",
@@ -3370,7 +3370,7 @@ dependencies = [
 [[package]]
 name = "kaspa-p2p-mining"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-consensus-core",
  "kaspa-consensusmanager",
@@ -3388,7 +3388,7 @@ dependencies = [
 [[package]]
 name = "kaspa-perf-monitor"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-core",
  "log",
@@ -3401,7 +3401,7 @@ dependencies = [
 [[package]]
 name = "kaspa-pow"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "js-sys",
  "kaspa-consensus-client",
@@ -3418,7 +3418,7 @@ dependencies = [
 [[package]]
 name = "kaspa-rpc-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "async-trait",
@@ -3460,7 +3460,7 @@ dependencies = [
 [[package]]
 name = "kaspa-rpc-macros"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "convert_case 0.6.0",
  "proc-macro-error",
@@ -3473,7 +3473,7 @@ dependencies = [
 [[package]]
 name = "kaspa-rpc-service"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-trait",
  "kaspa-addresses",
@@ -3505,7 +3505,7 @@ dependencies = [
 [[package]]
 name = "kaspa-seq-commit"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-hashes",
  "kaspa-merkle",
@@ -3516,7 +3516,7 @@ dependencies = [
 [[package]]
 name = "kaspa-shielded-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "blake2b_simd",
  "group",
@@ -3536,7 +3536,7 @@ dependencies = [
 [[package]]
 name = "kaspa-shielded-wallet"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-consensus-core",
  "kaspa-hashes",
@@ -3546,7 +3546,7 @@ dependencies = [
 [[package]]
 name = "kaspa-smt"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "blake3",
  "kaspa-hashes",
@@ -3557,7 +3557,7 @@ dependencies = [
 [[package]]
 name = "kaspa-smt-store"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-consensus-core",
  "kaspa-core",
@@ -3576,7 +3576,7 @@ dependencies = [
 
 [[package]]
 name = "kaspa-stratum-bridge"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3627,7 +3627,7 @@ dependencies = [
 [[package]]
 name = "kaspa-system-info"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-utils",
  "mac_address",
@@ -3639,7 +3639,7 @@ dependencies = [
 [[package]]
 name = "kaspa-txscript"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -3681,7 +3681,7 @@ dependencies = [
 [[package]]
 name = "kaspa-txscript-errors"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "borsh",
  "kaspa-hashes",
@@ -3692,7 +3692,7 @@ dependencies = [
 [[package]]
 name = "kaspa-utils"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "arc-swap",
  "async-channel 2.5.0",
@@ -3718,7 +3718,7 @@ dependencies = [
 [[package]]
 name = "kaspa-utils-tower"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "bytes",
  "cfg-if",
@@ -3735,7 +3735,7 @@ dependencies = [
 [[package]]
 name = "kaspa-utxoindex"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "futures",
  "kaspa-consensus-core",
@@ -3755,7 +3755,7 @@ dependencies = [
 [[package]]
 name = "kaspa-wasm-core"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "faster-hex",
  "hexplay",
@@ -3767,7 +3767,7 @@ dependencies = [
 [[package]]
 name = "kaspa-wrpc-server"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-trait",
  "borsh",
@@ -3796,7 +3796,7 @@ dependencies = [
 [[package]]
 name = "kaspad"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-channel 2.5.0",
  "borsh",
@@ -3853,7 +3853,7 @@ dependencies = [
 
 [[package]]
 name = "katpool-domain"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "chrono",
  "hex",
@@ -7775,7 +7775,7 @@ dependencies = [
 [[package]]
 name = "zkas-sdk"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "async-trait",
  "blake3",
@@ -7791,7 +7791,7 @@ dependencies = [
 [[package]]
 name = "zkas-signer"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-shielded-core",
  "orchard",
@@ -7802,7 +7802,7 @@ dependencies = [
 [[package]]
 name = "zkas-wallet-engine"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "kaspa-shielded-core",
  "serde",
@@ -7811,7 +7811,7 @@ dependencies = [
 [[package]]
 name = "zkas-walletd"
 version = "2.0.1"
-source = "git+https://github.com/firecash/zkas-rusty?rev=e3589f7e3bedf21b4894ceb562a61468108529a5#e3589f7e3bedf21b4894ceb562a61468108529a5"
+source = "git+https://github.com/firecash/zkas-rusty?rev=62d69bb9cc3b64af88bb8af0d1329f12e04459a1#62d69bb9cc3b64af88bb8af0d1329f12e04459a1"
 dependencies = [
  "argon2",
  "axum 0.7.9",
